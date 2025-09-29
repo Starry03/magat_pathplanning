@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# generate python env on orin nano with torch and torchvision wheels
+# tested on jetpack 6.2.1 with python 3.10.13 and cuda 12.6
+
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+
+pip install -r requirements.txt
+
+# install torch and torchvision for cuda 12.6 on jetson orin nano
+
+# torch
+pip install https://pypi.jetson-ai-lab.io/jp6/cu126/+f/590/92ab729aee2b8/torch-2.8.0-cp310-cp310-linux_aarch64.whl#sha256=59092ab729aee2b8937d80cc1b35d1128275bd02a7e1bc911e7efa375bd97226
+
+# torchvision
+pip install https://pypi.jetson-ai-lab.io/jp6/cu126/+f/1c0/3de08a69e9554/torchvision-0.23.0-cp310-cp310-linux_aarch64.whl#sha256=1c03de08a69e95542024477e0cde95fab3436804917133d3f00e67629d3fe902
+
+# test
+python -c "import torch; import torchvision; print(torch.__version__); print(torchvision.__version__)" | echo "torch and torchvision installed"
