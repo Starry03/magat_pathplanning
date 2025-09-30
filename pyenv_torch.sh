@@ -24,5 +24,8 @@ sudo cp /var/cudss-local-tegra-repo-ubuntu2204-0.6.0/cudss-*-keyring.gpg /usr/sh
 sudo apt-get update
 sudo apt-get -y install cudss
 
+# missing dependencies ignored by requirements.txt :)
+python3 -m pip install opencv-python pyyaml hashids drawsvg==1.9.0 seaborn torchsummaryX
+
 # test
 python -c "import torch; import torchvision; print(torch.__version__); print(torchvision.__version__)" | echo "torch and torchvision installed"

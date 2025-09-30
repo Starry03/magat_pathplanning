@@ -17,3 +17,8 @@ Results/
 # virtual environment
 .venv/
 build/
+
+# generated dataset
+maps/
+solutions/
+trainset/
