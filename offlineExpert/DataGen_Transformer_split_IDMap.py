@@ -8,6 +8,7 @@ import numpy as np
 import scipy.io as sio
 import yaml
 import argparse
+from queue import Empty
 
 from easydict import EasyDict
 from os.path import dirname, realpath, pardir
@@ -166,17 +167,41 @@ class DataTransformer:
         # div_valid = 0
         # div_test = 1500
 
-        div_train = self.config.div_train
-        div_valid = self.config.div_valid
-        div_test = self.config.div_test
+        div_train_cfg = self.config.div_train
+        div_valid_cfg = self.config.div_valid
+        div_test_cfg = self.config.div_test
 
+        len_train = len(self.list_sol_training)
+        len_valid = len(self.list_sol_valid)
+        len_test = len(self.list_sol_test)
+
+        div_train = min(div_train_cfg, len_train)
+        div_valid = min(div_valid_cfg, len_valid)
+        div_test = min(div_test_cfg, len_test)
+
+        if div_train < div_train_cfg:
+            print('[Warning] Requested {} train samples but only {} available.'.format(div_train_cfg, len_train))
+        if div_valid < div_valid_cfg:
+            print('[Warning] Requested {} valid samples but only {} available.'.format(div_valid_cfg, len_valid))
+        if div_test < div_test_cfg:
+            print('[Warning] Requested {} test samples but only {} available.'.format(div_test_cfg, len_test))
 
         if self.config.div_extend_valid !=0:
-            num_used_data = div_train + div_valid + div_test + self.config.div_extend_valid
+            num_used_data = div_train + div_valid + div_test + min(self.config.div_extend_valid, max(0, len_valid - div_valid))
         else:
             num_used_data = div_train + div_valid + div_test
 
         num_data_loop = min(num_used_data, self.len_failureCases_solution)
+
+        time.sleep(0.3)
+        processes = []
+        for i in range(self.PROCESS_NUMBER):
+            # Run Multiprocesses
+            p = Process(target=self.compute_thread, args=(str(i),))
+            processes.append(p)
+
+        for proc in processes:
+            proc.start()
 
         for id_sol in range(0, div_train):
             mode = "train"
@@ -193,48 +218,26 @@ class DataTransformer:
             case_config = (mode, id_sol)
             self.task_queue.put(case_config)
 
-        # for id_sol in range(num_data_loop):
-        # for id_sol in range(self.config.id_start, num_data_loop):
-        #     if id_sol < div_train:
-        #         mode = "train"
-        #         case_config = (mode, id_sol)
-        #         self.task_queue.put(case_config)
-        #     elif id_sol < (div_train+div_valid):
-        #         mode = "valid"
-        #         case_config = (mode, id_sol)
-        #         self.task_queue.put(case_config)
-        #     elif id_sol < (div_train + div_valid + div_test):
-        #         mode = "test"
-        #         case_config = (mode, id_sol)
-        #         self.task_queue.put(case_config)
-        #
-        #     elif id_sol <= num_used_data:
-        #         mode = "valid"
-        #         case_config = (mode, id_sol)
-        #         self.task_queue.put(case_config)
+        for _ in processes:
+            self.task_queue.put(None)
 
-        time.sleep(0.3)
-        processes = []
-        for i in range(self.PROCESS_NUMBER):
-            # Run Multiprocesses
-            p = Process(target=self.compute_thread, args=(str(i)))
-
-            processes.append(p)
-
-        [x.start() for x in processes]
+        for proc in processes:
+            proc.join()
 
 
     def compute_thread(self,thread_id):
         while True:
             try:
-                case_config = self.task_queue.get(block=False)
-                (mode, id_sol) = case_config
-                print('thread {} get task:{} - {}'.format(thread_id, mode, id_sol))
-                self.pipeline(case_config)
+                case_config = self.task_queue.get(timeout=1.0)
+            except Empty:
+                continue
 
-            except:
-                # print('thread {} no task, exit'.format(thread_id))
+            if case_config is None:
                 return
+
+            (mode, id_sol) = case_config
+            print('thread {} get task:{} - {}'.format(thread_id, mode, id_sol))
+            self.pipeline(case_config)
 
     def pipeline(self, case_config):
         (mode, id_sol) = case_config
