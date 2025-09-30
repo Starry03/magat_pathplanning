@@ -5,13 +5,15 @@ Q. Li, W. Lin, Z. Liu and A. Prorok, "Message-Aware Graph Attention Networks for
 '''
 
 import shutil
+import copy
 
 from fnmatch import fnmatch
 import os
 import numpy as np
 import time
 import pickle
-from torch.multiprocessing import Pool, Queue, Lock, Process, spawn, Manager, set_start_method
+from torch.multiprocessing import Pool, Queue, Lock, Process, Manager, set_start_method
+from torch.multiprocessing.spawn import spawn
 import torch
 from torch.backends import cudnn
 import torch.optim as optim
@@ -706,6 +708,8 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
 
         self.recorder.reset()
 
+        model_for_spawn = copy.deepcopy(self.model).cpu()
+
 
         manager = Manager()
         recorder_queue = manager.Queue()
@@ -720,7 +724,7 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
             for i in range(NUM_PROCESSES):
                 p = spawn(test_thread, args=(i,
                                             self.config,
-                                            self.model,
+                                            model_for_spawn,
                                             gpu_lock,
                                             task_queue,
                                             recorder_queue,
