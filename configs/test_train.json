@@ -16,7 +16,7 @@
 
   "trained_map_w": 20,
   "trained_map_h": 20,
-  "trained_map_density": 1,
+  "trained_map_density": 0.1,
   "trained_num_agents": 10,
 
   "nGraphFilterTaps": 3,
@@ -53,7 +53,7 @@
   "pin_memory": true,
   "async_loading": true,
 
-  "batch_size": 64,
+  "batch_size": 16,
   "valid_batch_size": 1,
   "test_batch_size": 1
 }
