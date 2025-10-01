@@ -9,8 +9,6 @@ pip install --upgrade pip
 
 pip install -r requirements.txt
 
-# install torch and torchvision for cuda 12.6 on jetson orin nano
-
 # torch
 pip install https://pypi.jetson-ai-lab.io/jp6/cu126/+f/590/92ab729aee2b8/torch-2.8.0-cp310-cp310-linux_aarch64.whl#sha256=59092ab729aee2b8937d80cc1b35d1128275bd02a7e1bc911e7efa375bd97226
 
@@ -28,6 +26,8 @@ fi
 
 # missing dependencies ignored by requirements.txt :)
 python3 -m pip install opencv-python pyyaml hashids drawsvg==1.9.0 seaborn torchsummaryX
+sudo apt-get update
+sudo apt-get -y install libyaml-cpp-dev
 
 # test
-python -c "import torch; import torchvision; print(torch.__version__); print(torchvision.__version__)" | echo "torch and torchvision installed"
+python -c "import torch; import torchvision; print(torch.__version__); print(torchvision.__version__); print('detected gpu' if torch.cuda.is_available() else 'no gpu detected')" | echo "torch and torchvision installed"

@@ -7,7 +7,6 @@
   "save_data": "./Data/",
   "save_tb_data": "./Data/Tensorboard",
 
-
   "map_w": 20,
   "map_h": 20,
   "map_density": 0.1,
