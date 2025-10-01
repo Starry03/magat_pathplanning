@@ -46,6 +46,8 @@ from graphs.losses.cross_entropy import CrossEntropyLoss
 from graphs.losses.regularizer import L1Regularizer, L2Regularizer
 from utils.misc import print_cuda_statistics
 
+import copy
+
 cudnn.benchmark = True
 
 
@@ -712,6 +714,31 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
 
         self.recorder.reset()
 
+        # Instead of deepcopy (which can keep hidden CUDA references), 
+        # we save and reload the model state_dict to ensure a clean CPU copy
+        import io
+        buffer = io.BytesIO()
+        
+        # Save model state on CPU
+        model_cpu = self.model.cpu()
+        torch.save({
+            'state_dict': model_cpu.state_dict(),
+            'model_class': type(model_cpu),
+        }, buffer)
+        buffer.seek(0)
+        
+        # Move original model back to GPU
+        self.model.to(self.config.device)
+        
+        # Pass device info instead of device object
+        config_dict = vars(self.config).copy()
+        device_type = str(self.config.device)
+        config_dict['device'] = device_type
+        config_dict['gpu_device'] = self.config.gpu_device
+        
+        # Pass the serialized model buffer
+        model_buffer = buffer.getvalue()
+
         manager = Manager()
         recorder_queue = manager.Queue()
         task_queue = manager.Queue(self.config.test_len_taskqueue)
@@ -724,8 +751,8 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
 
             for i in range(NUM_PROCESSES):
                 p = spawn(test_thread, args=(i,
-                                             self.config,
-                                             self.model,
+                                             config_dict,
+                                             model_buffer,
                                              gpu_lock,
                                              task_queue,
                                              recorder_queue,
@@ -745,10 +772,10 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
                 except Exception as e:
                     print(e)
 
-            # Wait for all processes done
-            for p in ps:
-                p.join()
-
+            # Send stop signals to all worker processes
+            for _ in range(NUM_PROCESSES):
+                task_queue.put(None)  # None signals worker to stop
+            
             # Read recorder queue until finish all
             count_task = 0
             while count_task < size_dataset:
@@ -761,6 +788,10 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
                     log_result = recorder_queue.get(block=True)
                 self.recorder.update(log_result[0], log_result[1:])
                 count_task += 1
+
+            # Wait for all processes done
+            for p in ps:
+                p.join()
 
             print('all tasks should have been done...Waiting for subprocesses to finish')
             print('all subprocesses finished.')
@@ -976,7 +1007,7 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
             print("Computation time:\t{} ".format(self.time_record))
 
 
-def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
+def test_thread(thread_subid, thread_index, config_dict, model_buffer, lock, task_queue,
                 recorder_queue, switch_toOnlineExpert):
     '''
     This is for a single testing thread
@@ -985,14 +1016,47 @@ def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
     # Delay 10s
     time.sleep(3)
     print('thread {} started'.format(thread_index))
+    
+    # Reconstruct config from dict and set device properly
+    from easydict import EasyDict
+    import io
+    config = EasyDict(config_dict)
+    # Recreate the device object in this process
+    if 'cuda' in config.device:
+        config.device = torch.device("cuda:{}".format(config.gpu_device))
+    else:
+        config.device = torch.device("cpu")
+    
+    # Reconstruct model from buffer
+    buffer = io.BytesIO(model_buffer)
+    checkpoint = torch.load(buffer, map_location='cpu')
+    
+    # Import the model class
+    if not config.batch_numAgent:
+        from graphs.models.decentralplanner_noBatch import DecentralPlannerNet
+    else:
+        from graphs.models.decentralplanner import DecentralPlannerNet
+    
+    # Create new model instance and load weights
+    model = DecentralPlannerNet(config)
+    model.load_state_dict(checkpoint['state_dict'])
+    
+    # Move model to device in this process
+    model = model.to(config.device)
     model.eval()
+    
     with torch.no_grad():
-        while task_queue.qsize() > 0:
+        while True:
             try:
-                input, load_target, makespanTarget, tensor_map, ID_dataset, mode, tmp_path = task_queue.get(block=False)
+                task_data = task_queue.get(timeout=10)
+                if task_data is None:  # Stop signal
+                    print('thread {} received stop signal'.format(thread_index))
+                    return
+                    
+                input, load_target, makespanTarget, tensor_map, ID_dataset, mode, tmp_path = task_data
                 print('thread {} gets task {}'.format(thread_index, ID_dataset))
             except Exception as e:
-                print(e)
+                print('thread {} finished or timeout: {}'.format(thread_index, e))
                 return
 
             try:

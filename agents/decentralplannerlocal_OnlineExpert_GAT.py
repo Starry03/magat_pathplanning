@@ -14,6 +14,7 @@ import time
 import pickle
 from torch.multiprocessing import Pool, Queue, Lock, Process, Manager, set_start_method
 from torch.multiprocessing.spawn import spawn
+from queue import Empty
 import torch
 from torch.backends import cudnn
 import torch.optim as optim
@@ -708,8 +709,30 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
 
         self.recorder.reset()
 
-        model_for_spawn = copy.deepcopy(self.model).cpu()
-
+        # Instead of deepcopy (which can keep hidden CUDA references), 
+        # we save and reload the model state_dict to ensure a clean CPU copy
+        import io
+        buffer = io.BytesIO()
+        
+        # Save model state on CPU
+        model_cpu = self.model.cpu()
+        torch.save({
+            'state_dict': model_cpu.state_dict(),
+            'model_class': type(model_cpu),
+        }, buffer)
+        buffer.seek(0)
+        
+        # Move original model back to GPU
+        self.model.to(self.config.device)
+        
+        # Pass device info instead of device object
+        config_dict = vars(self.config).copy()
+        device_type = str(self.config.device)
+        config_dict['device'] = device_type
+        config_dict['gpu_device'] = self.config.gpu_device
+        
+        # Pass the serialized model buffer
+        model_buffer = buffer.getvalue()
 
         manager = Manager()
         recorder_queue = manager.Queue()
@@ -720,11 +743,11 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
         ps = []
         with torch.no_grad():
             # self.model.share_memory()
-
+            print(NUM_PROCESSES, 'processes will be created to handle', size_dataset, 'tasks')
             for i in range(NUM_PROCESSES):
                 p = spawn(test_thread, args=(i,
-                                            self.config,
-                                            model_for_spawn,
+                                            config_dict,
+                                            model_buffer,
                                             gpu_lock,
                                             task_queue,
                                             recorder_queue,
@@ -744,10 +767,10 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
                 except Exception as e:
                     print(e)
 
-            # Wait for all processes done
-            for p in ps:
-                p.join()
-
+            # Send stop signals to all worker processes
+            for _ in range(NUM_PROCESSES):
+                task_queue.put(None)  # None signals worker to stop
+            
             # Read recorder queue until finish all
             count_task = 0
             while count_task<size_dataset:
@@ -760,6 +783,10 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
                     log_result = recorder_queue.get(block=True)
                 self.recorder.update(log_result[0], log_result[1:])
                 count_task += 1
+
+            # Wait for all processes done
+            for p in ps:
+                p.join()
 
             print('all tasks should have been done...Waiting for subprocesses to finish')
             print('all subprocesses finished.')
@@ -979,7 +1006,7 @@ class DecentralPlannerAgentLocalWithOnlineExpertGAT(BaseAgent):
             print("Computation time:\t{} ".format(self.time_record))
 
 
-def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
+def test_thread(thread_subid, thread_index, config_dict, model_buffer, lock, task_queue,
                 recorder_queue, switch_toOnlineExpert):
     '''
     This is for a single testing thread
@@ -988,15 +1015,60 @@ def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
     # Delay 10s
     time.sleep(3)
     print('thread {} started'.format(thread_index))
+    
+    # Reconstruct config from dict and set device properly
+    from easydict import EasyDict
+    import io
+    config = EasyDict(config_dict)
+    # Recreate the device object in this process
+    if 'cuda' in config.device:
+        config.device = torch.device("cuda:{}".format(config.gpu_device))
+    else:
+        config.device = torch.device("cpu")
+    
+    # Reconstruct model from buffer
+    buffer = io.BytesIO(model_buffer)
+    checkpoint = torch.load(buffer, map_location='cpu')
+    
+    # Import the model class based on config
+    if not config.batch_numAgent:
+        from graphs.models.decentralplanner_GAT_noBatch import DecentralPlannerGATNet
+    else:
+        if config.bottleneckMode == 'BottomNeck_only':
+            from graphs.models.decentralplanner_GAT_bottleneck import DecentralPlannerGATNet
+        elif config.bottleneckMode == 'BottomNeck_skipConcat':
+            from graphs.models.decentralplanner_GAT_bottleneck_SkipConcat import DecentralPlannerGATNet
+        elif config.bottleneckMode == 'BottomNeck_skipConcatGNN':
+            from graphs.models.decentralplanner_GAT_bottleneck_SkipConcatGNN import DecentralPlannerGATNet
+        elif config.bottleneckMode == 'BottomNeck_skipAddGNN':
+            from graphs.models.decentralplanner_GAT_bottleneck_SkipAddGNN import DecentralPlannerGATNet
+        else:
+            from graphs.models.decentralplanner_GAT import DecentralPlannerGATNet
+    
+    # Create new model instance and load weights
+    model = DecentralPlannerGATNet(config)
+    model.load_state_dict(checkpoint['state_dict'])
+    
+    # Move model to device in this process
+    model = model.to(config.device)
     model.eval()
+    
     with torch.no_grad():
-        while task_queue.qsize() > 0:
+        while True:
             try:
-                input, load_target, makespanTarget, tensor_map, ID_dataset, mode, tmp_path = task_queue.get(block=False)
-                print('thread {} gets task {}'.format(thread_index, ID_dataset))
+                task_data = task_queue.get(timeout=10)
+            except Empty:
+                continue
             except Exception as e:
-                print(e)
+                print('thread {}: error fetching task: {}'.format(thread_index, e))
                 return
+
+            if task_data is None:  # Stop signal
+                print('thread {} received stop signal'.format(thread_index))
+                break
+
+            input, load_target, makespanTarget, tensor_map, ID_dataset, mode, tmp_path = task_data
+            print('thread {} gets task {}'.format(thread_index, ID_dataset))
 
             try:
                 if config.test_checkpoint:
@@ -1038,6 +1110,7 @@ def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
 
                     # lock.acquire() # Lock GPU
 
+                    print(f"DEBUG: {thread_subid} on step {step}")
                     currentStateGPU = currentState.to(config.device)
                     gsoGPU = gso.to(config.device)
                     model.addGSO(gsoGPU)

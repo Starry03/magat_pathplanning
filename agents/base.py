@@ -13,6 +13,9 @@ class BaseAgent:
         self.config = config
         self.logger = logging.getLogger("Agent")
 
+    def __str__(self):
+        return f"BaseAgent(config={self.config})"
+
     def load_checkpoint(self, file_name, lastest=True, best=False):
         """
         Latest checkpoint loader

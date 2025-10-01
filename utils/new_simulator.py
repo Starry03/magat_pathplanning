@@ -110,6 +110,9 @@ class multiRobotSimNew:
         self.failureCases_input = self.config.failCases_dir + 'input/'
         self.dir_sol = os.path.join(self.config.failCases_dir, "output_ECBS/")
 
+    def __str__(self):
+        return f"MultiRobotSimNew(num_agents={self.config.num_agents}, map_size={self.size_map})"
+
     def setup(self, loadInput, loadTarget, case_config, tensor_map, ID_dataset, mode):
         '''
         Setup of environment, called before actual use.

@@ -978,12 +978,17 @@ def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
     print('thread {} started'.format(thread_index))
     model.eval()
     with torch.no_grad():
-        while task_queue.qsize() > 0:
+        while True:
             try:
-                input, load_target, makespanTarget, tensor_map, ID_dataset, mode, tmp_path = task_queue.get(block=False)
+                task_data = task_queue.get(timeout=10)
+                if task_data is None:  # Stop signal
+                    print('thread {} received stop signal'.format(thread_index))
+                    return
+                    
+                input, load_target, makespanTarget, tensor_map, ID_dataset, mode, tmp_path = task_data
                 print('thread {} gets task {}'.format(thread_index, ID_dataset))
             except Exception as e:
-                print(e)
+                print('thread {} finished or timeout: {}'.format(thread_index, e))
                 return
 
             try:
