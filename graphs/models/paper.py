@@ -53,16 +53,24 @@ class PaperArchitecture(Module):
         )
 
     def _dense_to_edge_index(self, S: Tensor):
-        B, N, _ = S.shape
+        """
+
+        return: edge_index in shape [2, E]
+        """
+        B, _, N, _ = S.shape
         rows, cols = [], []
         for b in range(B):
             idx = (S[b] > 0).nonzero(as_tuple=False)  # coppie (i,j)
             if idx.numel() == 0:
                 continue
+
+            # geometric offset to have a single big graph
             rows.append(idx[:, 0] + b * N)
             cols.append(idx[:, 1] + b * N)
         if not rows:
             return torch.empty(2, 0, dtype=torch.long, device=S.device)
+
+        # concatenate all batches
         return torch.stack([torch.cat(rows), torch.cat(cols)], dim=0)
 
     def addGSO(self, S: Tensor) -> None:
@@ -135,9 +143,14 @@ class PaperArchitecture(Module):
         x = self._format_to_conv2d(x).to(self.device)
         x = self.conv1(x)
         x = self.conv2(x)
-        x = self.conv3(x)
+        x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
 
-        # graph conv layer
+        edge_index = self._dense_to_edge_index(self.S).to(self.device)
+        feat = x.view(
+            -1, 128
+        )  # [B*N, 128] wl and hl are pooled out (only features remain)
+        x = self.cgnn(feat, edge_index)  # [B*N, 128]
+        x = x.view(-1, 128, self.wl // 8, self.hl // 8)  # [B*N, 128, wl/8, hl/8]
 
         # fully connected layers
         x = self.fc(x)

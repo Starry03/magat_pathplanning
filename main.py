@@ -118,7 +118,7 @@ def main():
     arg_parser.add_argument('--test_checkpoint', action='store_true', default=False)
     arg_parser.add_argument('--test_checkpoint_restart', action='store_true', default=False)
     arg_parser.add_argument('--old_simulator', action='store_true', default=False)
-    arg_parser.add_argument('--batch_numAgent', action='store_true', default=False)
+    arg_parser.add_argument('--batch_numAgent', action='store_true', default=True)
 
     arg_parser.add_argument('--no_ReLU', action='store_true', default=False)
 

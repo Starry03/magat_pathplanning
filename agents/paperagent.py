@@ -674,7 +674,7 @@ class PaperArchitectureAgent(BaseAgent):
 
     def mutliAgent_ActionPolicy(self, input, load_target, makespanTarget, tensor_map, ID_dataset,mode):
 
-        self.robot.setup(input, load_target, makespanTarget, tensor_map, ID_dataset)
+        self.robot.setup(input, load_target, makespanTarget, tensor_map, ID_dataset, mode)
         maxstep = self.robot.getMaxstep()
 
         allReachGoal = False
