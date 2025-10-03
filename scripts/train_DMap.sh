@@ -23,16 +23,19 @@
 # #########
 # ##################################
 
+source .venv/bin/activate
 
+## test
 
-## GNN 128
-
-python main.py configs/dcp_OE_Random.json --mode train \
+python main.py configs/test/test_train.json --mode train \
     --map_density 1 --map_w 20 --num_agents 10 --nGraphFilterTaps 2   \
     --trained_num_agents 10 --commR 7 --GSO_mode dist_GSO --update_valid_set 1000 \
     --update_valid_set_epoch 70 --threshold_SuccessRate 97 --default_actionSelect \
-    --guidance Project_G --CNN_mode ResNetLarge_withMLP --batch_numAgent \
-    --test_num_processes 0   --tb_ExpName GNN_Resnet_3Block_distGSO_baseline_128
+    --guidance Project_G \
+    # --CNN_mode ResNetLarge_withMLP \
+    --batch_numAgent \
+    --test_num_processes 0
+    # --tb_ExpName GNN_Resnet_3Block_distGSO_baseline_128
 
 ## GAT 128
 

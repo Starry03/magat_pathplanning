@@ -1,6 +1,6 @@
 {
-  "exp_net": "dcpOEGAT",
-  "agent": "DecentralPlannerAgentLocalWithOnlineExpertGAT",
+  "exp_net": "PaperArchitecture",
+  "agent": "PaperArchitectureAgent",
   "data_loader": "DecentralPlannerDataLoader",
 
   "data_root": "/home/starry/Documents/uni_project/magat_pathplanning/offlineExpert/trainset/",
@@ -21,7 +21,7 @@
   "nGraphFilterTaps": 3,
   "nAttentionHeads": 1,
   "AttentionConcat": true,
-  "hiddenFeatures": 0,
+  "hiddenFeatures": 128,
 
   "num_test_trainingSet": 8000,
   "num_validset": 1000,
@@ -34,14 +34,13 @@
   "cuda": true,
   "gpu_device": 0,
 
-  "checkpoint_file": "checkpoint.pth.tar",
   "seed": 1337,
 
   "learning_rate": 0.001,
   "weight_decay": 0.00001,
   "momentum": 0.5,
   "penaltyCollision": 0.05,
-  "max_epoch": 300,
+  "max_epoch": 5,
   "Start_onlineExpert": 0,
 
   "log_interval": 500,
@@ -52,7 +51,7 @@
   "pin_memory": true,
   "async_loading": true,
 
-  "batch_size": 16,
+  "batch_size": 64,
   "valid_batch_size": 1,
   "test_batch_size": 1
 }
