@@ -63,7 +63,7 @@ class PaperArchitecture(Module):
             except Exception as e:
                 self.logger.debug(f"Model summary skipped: {e}")
 
-    def _dense_to_edge_index(self, S: Tensor):
+    def _agents_to_edge_index(self, S: Tensor):
         """
 
         return: edge_index in shape [2, E]
@@ -157,7 +157,7 @@ class PaperArchitecture(Module):
         x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
 
         # graph convolutional layer
-        edge_index = self._dense_to_edge_index(self.S).to(self.device)
+        edge_index = self._agents_to_edge_index(self.S).to(self.device)
         feat = x.view(
             -1, 128
         )  # [B*N, 128] wl and hl are pooled out (only features remain)

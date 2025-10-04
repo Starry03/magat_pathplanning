@@ -976,6 +976,7 @@ def test_thread(thread_subid, thread_index, config, model, lock, task_queue,
     # Delay 10s
     time.sleep(3)
     print('thread {} started'.format(thread_index))
+    model.to(config.device)
     model.eval()
     with torch.no_grad():
         while True:

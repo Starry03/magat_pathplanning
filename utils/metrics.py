@@ -10,11 +10,11 @@ import scipy.io as sio
 
 class MonitoringMultiAgentPerformance:
     def __init__(self, config):
-        '''
+        """
         Init a new performance tracker
         Args:
             config: global config
-        '''
+        """
         self.config = config
         self.count_validset = None
         self.count_reachGoal = None
@@ -58,11 +58,11 @@ class MonitoringMultiAgentPerformance:
         self.list_computationTime = None
 
     def reset(self):
-        '''
+        """
         Reset all metrics
         Returns:
 
-        '''
+        """
         self.count_validset = 0
         self.count_reachGoal = 0
         self.count_noReachGoalSH = 0
@@ -111,7 +111,7 @@ class MonitoringMultiAgentPerformance:
         self.save_statistics = {}
 
     def update(self, maxstep, log_result):
-        '''
+        """
         Update the tracker
         Args:
             maxstep: not used now
@@ -119,16 +119,33 @@ class MonitoringMultiAgentPerformance:
 
         Returns:
 
-        '''
+        """
         # [allReachGoal, noReachGoalbyCollsionShielding, findOptimalSolution, check_collisionFreeSol, check_CollisionPredictedinLoop, compare_makespan, compare_flowtime, num_agents_reachgoal, storeCase_GSO, storeCase_communication_radius, time_record , Time_cases_ForwardPass] = log_result
 
-        [allReachGoal, noReachGoalbyCollsionShielding, findOptimalSolution, check_collisionFreeSol, check_CollisionPredictedinLoop, compare_makespan, compare_flowtime, num_agents_reachgoal, time_record, Time_cases_ForwardPass] = log_result
+        [
+            allReachGoal,
+            noReachGoalbyCollsionShielding,
+            findOptimalSolution,
+            check_collisionFreeSol,
+            check_CollisionPredictedinLoop,
+            compare_makespan,
+            compare_flowtime,
+            num_agents_reachgoal,
+            store_GSO,
+            store_communication_radius,
+            time_record,
+            Time_cases_ForwardPass,
+        ] = log_result
 
         [self.makespanPredict, self.makespanTarget] = compare_makespan
         [self.flowtimePredict, self.flowtimeTarget] = compare_flowtime
 
-        rate_deltaMP = abs(self.makespanPredict - self.makespanTarget) / self.makespanTarget
-        rate_deltaFT = abs(self.flowtimePredict - self.flowtimeTarget) / self.flowtimeTarget
+        rate_deltaMP = (
+            abs(self.makespanPredict - self.makespanTarget) / self.makespanTarget
+        )
+        rate_deltaFT = (
+            abs(self.flowtimePredict - self.flowtimeTarget) / self.flowtimeTarget
+        )
 
         self.list_MP_predict.append(self.makespanPredict)
         self.list_MP_target.append(self.makespanTarget)
@@ -172,7 +189,7 @@ class MonitoringMultiAgentPerformance:
         self.count_validset += 1
 
     def summary(self, label, summary_writer, current_epoch):
-        '''
+        """
         This function creates summary data for the system
         Args:
             label: train/valid/test
@@ -181,20 +198,22 @@ class MonitoringMultiAgentPerformance:
 
         Returns:
             summary_writer
-        '''
+        """
         self.rateReachGoal = self.count_reachGoal / self.count_validset
 
         self.rateFailedReachGoalSH = self.count_noReachGoalSH / self.count_validset
 
-        self.ratefindOptimalSolution = self.count_findOptimalSolution / self.count_validset
+        self.ratefindOptimalSolution = (
+            self.count_findOptimalSolution / self.count_validset
+        )
 
         self.rateCollsionFreeSol = self.count_collisionFreeSol / self.count_validset
-        self.rateCollisionPredictedinLoop = self.count_CollisionPredictedinLoop / self.count_validset
-
+        self.rateCollisionPredictedinLoop = (
+            self.count_CollisionPredictedinLoop / self.count_validset
+        )
 
         # self.avg_rate_deltaMP = sum(self.list_rate_deltaMP) / self.count_validset
         # self.avg_rate_deltaFT = sum(self.list_rate_deltaFT) / self.count_validset
-
 
         self.array_rate_deltaMP = np.array(self.list_rate_deltaMP)
         self.array_rate_deltaFT = np.array(self.list_rate_deltaFT)
@@ -207,62 +226,92 @@ class MonitoringMultiAgentPerformance:
         self.std_rate_deltaFT = np.std(self.array_rate_deltaFT, ddof=1)
         # sample std
 
-
-
-        if label == 'test':
+        if label == "test":
             self.test_summary(summary_writer)
 
         else:
-            summary_writer.add_scalar("epoch/{}_set_Accuracy_reachGoalNoCollision".format(label),
-                                      self.rateReachGoal, current_epoch)
+            summary_writer.add_scalar(
+                "epoch/{}_set_Accuracy_reachGoalNoCollision".format(label),
+                self.rateReachGoal,
+                current_epoch,
+            )
 
-            summary_writer.add_scalar("epoch/{}_set_DeteriorationRate_MakeSpan".format(label),
-                                      self.avg_rate_deltaMP, current_epoch)
+            summary_writer.add_scalar(
+                "epoch/{}_set_DeteriorationRate_MakeSpan".format(label),
+                self.avg_rate_deltaMP,
+                current_epoch,
+            )
 
-            summary_writer.add_scalar("epoch/{}_set_DeteriorationRate_FlowTime".format(label),
-                                      self.avg_rate_deltaFT, current_epoch)
+            summary_writer.add_scalar(
+                "epoch/{}_set_DeteriorationRate_FlowTime".format(label),
+                self.avg_rate_deltaFT,
+                current_epoch,
+            )
 
-            summary_writer.add_scalar("epoch/{}_set_Rate_CollisionPredictedinLoop".format(label),
-                                      self.rateCollisionPredictedinLoop, current_epoch)
+            summary_writer.add_scalar(
+                "epoch/{}_set_Rate_CollisionPredictedinLoop".format(label),
+                self.rateCollisionPredictedinLoop,
+                current_epoch,
+            )
 
-            summary_writer.add_scalar("epoch/{}_set_Rate_FailedReachGoalSH".format(label),
-                                      self.rateFailedReachGoalSH, current_epoch)
-
+            summary_writer.add_scalar(
+                "epoch/{}_set_Rate_FailedReachGoalSH".format(label),
+                self.rateFailedReachGoalSH,
+                current_epoch,
+            )
 
         return summary_writer
 
     def test_summary(self, summary_writer):
-        '''
+        """
         This function saves the summary of performance a file for future analysis
         Args:
             summary_writer: Tensorboard summary_writer
 
         Returns:
 
-        '''
-        label = 'test'
+        """
+        label = "test"
         # label = 'train'
 
-        self.count_numAgentReachGoal = [] #= np.zeros([1, self.config.num_agents])
-        for i in range(self.config.num_agents+1):
+        self.count_numAgentReachGoal = []  # = np.zeros([1, self.config.num_agents])
+        for i in range(self.config.num_agents + 1):
             self.count_numAgentReachGoal.append(self.list_numAgentReachGoal.count(i))
 
+        summary_writer.add_scalar(
+            "{}_set/Accuracy_reachGoalNoCollision".format(label),
+            self.rateReachGoal,
+            self.config.num_agents,
+        )
 
-        summary_writer.add_scalar("{}_set/Accuracy_reachGoalNoCollision".format(label),
-                                  self.rateReachGoal, self.config.num_agents)
+        summary_writer.add_scalar(
+            "{}_set/Rate_FailedReachGoalbyCollsionShielding".format(label),
+            self.rateFailedReachGoalSH,
+            self.config.num_agents,
+        )
 
-        summary_writer.add_scalar("{}_set/Rate_FailedReachGoalbyCollsionShielding".format(label),
-                                  self.rateFailedReachGoalSH, self.config.num_agents)
+        summary_writer.add_scalar(
+            "{}_set/DeteriorationRate_MakeSpan".format(label),
+            self.avg_rate_deltaMP,
+            self.config.num_agents,
+        )
 
-        summary_writer.add_scalar("{}_set/DeteriorationRate_MakeSpan".format(label),
-                                  self.avg_rate_deltaMP, self.config.num_agents)
+        summary_writer.add_scalar(
+            "{}_set/DeteriorationRate_FlowTime".format(label),
+            self.avg_rate_deltaFT,
+            self.config.num_agents,
+        )
 
-        summary_writer.add_scalar("{}_set/DeteriorationRate_FlowTime".format(label),
-                                  self.avg_rate_deltaFT, self.config.num_agents)
-
-
-        exp_setup = '{}{}x{}_rho{}_{}Agent'.format(self.config.map_type, self.config.map_w, self.config.map_w, self.config.map_density, self.config.num_agents)
-        dir_name = os.path.join(self.config.result_statistics_dir, self.config.exp_net, exp_setup)
+        exp_setup = "{}{}x{}_rho{}_{}Agent".format(
+            self.config.map_type,
+            self.config.map_w,
+            self.config.map_w,
+            self.config.map_density,
+            self.config.num_agents,
+        )
+        dir_name = os.path.join(
+            self.config.result_statistics_dir, self.config.exp_net, exp_setup
+        )
         try:
             # Create target Directory
             os.makedirs(dir_name)
@@ -271,72 +320,114 @@ class MonitoringMultiAgentPerformance:
             pass
 
         if self.config.lastest_epoch:
-            log_epoch = 'lastest'
+            log_epoch = "lastest"
         elif self.config.best_epoch:
-            log_epoch = 'best'
+            log_epoch = "best"
         else:
             log_epoch = int(self.config.test_epoch)
 
-        self.save_statistics.update({'exp_net': self.config.exp_net,
-                                     'exp_stamps': self.config.exp_time,
-                                     'commRadius': self.config.commR,
-                                     'FOV': self.config.FOV,
-                                     'trained_model_epoch': log_epoch,
-                                     'map_size_trained':[self.config.trained_map_w,self.config.trained_map_w],
-                                     'map_density_trained':self.config.trained_map_density,
-                                     'num_agents_trained': self.config.trained_num_agents,
-                                     'map_size_testing': [self.config.map_w, self.config.map_h],
-                                     'map_density_testing': self.config.map_density,
-                                     'num_agents_testing': self.config.num_agents,
-
-                                     'K': self.config.nGraphFilterTaps,
-                                     'hidden_state':self.config.hiddenFeatures,
-                                     'nAttentionHeads':self.config.nAttentionHeads,
-                                     'numInputFeatures': self.config.numInputFeatures,
-
-                                     'data_set':self.config.data_set,
-
-                                     'rate_ReachGoal': self.rateReachGoal,
-                                     'num_ReachGoal': self.count_reachGoal,
-                                     'rate_notReachGoalSH': self.rateFailedReachGoalSH,
-                                     'num_notReachGoalSH': self.count_noReachGoalSH,
-                                     'list_reachGoal': self.list_reachGoal,
-                                     'list_noReachGoalSH': self.list_noReachGoalSH,
-                                     'list_numAgentReachGoal': self.list_numAgentReachGoal,
-                                     'hist_numAgentReachGoal': self.count_numAgentReachGoal,
-
-                                     'list_MP_predict': self.list_MP_predict,
-                                     'list_MP_target': self.list_MP_target,
-                                     'list_FT_predict': self.list_FT_predict,
-                                     'list_FT_target': self.list_FT_target,
-
-                                     'list_computationTime': self.list_computationTime,
-                                     'list_ForwardPassTime': self.list_ForwardPassTime,
-
-
-                                     'list_compareMP': self.list_compareMP,
-                                     'list_compareFT': self.list_compareFT,
-                                     'list_deltaMP': self.array_rate_deltaMP,
-                                     'mean_deltaMP': self.avg_rate_deltaMP,
-                                     'std_deltaMP': self.std_rate_deltaMP,
-                                     'list_deltaFT': self.array_rate_deltaFT,
-                                     'mean_deltaFT': self.avg_rate_deltaFT,
-                                     'std_deltaFT': self.std_rate_deltaFT,
-                                     'num_CollisionPredicted': self.count_CollisionPredictedinLoop,
-                                     'num_validset': self.count_validset,
-                                     })
+        self.save_statistics.update(
+            {
+                "exp_net": self.config.exp_net,
+                "exp_stamps": self.config.exp_time,
+                "commRadius": self.config.commR,
+                "FOV": self.config.FOV,
+                "trained_model_epoch": log_epoch,
+                "map_size_trained": [
+                    self.config.trained_map_w,
+                    self.config.trained_map_w,
+                ],
+                "map_density_trained": self.config.trained_map_density,
+                "num_agents_trained": self.config.trained_num_agents,
+                "map_size_testing": [self.config.map_w, self.config.map_h],
+                "map_density_testing": self.config.map_density,
+                "num_agents_testing": self.config.num_agents,
+                "K": self.config.nGraphFilterTaps,
+                "hidden_state": self.config.hiddenFeatures,
+                "nAttentionHeads": self.config.nAttentionHeads,
+                "numInputFeatures": self.config.numInputFeatures,
+                "data_set": self.config.data_set,
+                "rate_ReachGoal": self.rateReachGoal,
+                "num_ReachGoal": self.count_reachGoal,
+                "rate_notReachGoalSH": self.rateFailedReachGoalSH,
+                "num_notReachGoalSH": self.count_noReachGoalSH,
+                "list_reachGoal": self.list_reachGoal,
+                "list_noReachGoalSH": self.list_noReachGoalSH,
+                "list_numAgentReachGoal": self.list_numAgentReachGoal,
+                "hist_numAgentReachGoal": self.count_numAgentReachGoal,
+                "list_MP_predict": self.list_MP_predict,
+                "list_MP_target": self.list_MP_target,
+                "list_FT_predict": self.list_FT_predict,
+                "list_FT_target": self.list_FT_target,
+                "list_computationTime": self.list_computationTime,
+                "list_ForwardPassTime": self.list_ForwardPassTime,
+                "list_compareMP": self.list_compareMP,
+                "list_compareFT": self.list_compareFT,
+                "list_deltaMP": self.array_rate_deltaMP,
+                "mean_deltaMP": self.avg_rate_deltaMP,
+                "std_deltaMP": self.std_rate_deltaMP,
+                "list_deltaFT": self.array_rate_deltaFT,
+                "mean_deltaFT": self.avg_rate_deltaFT,
+                "std_deltaFT": self.std_rate_deltaFT,
+                "num_CollisionPredicted": self.count_CollisionPredictedinLoop,
+                "num_validset": self.count_validset,
+            }
+        )
 
         # save the result of inference stage
-        exp_HyperPara = "{}_F{}_K{}_HS{}_P{}".format(self.config.exp_net, self.config.numInputFeatures,self.config.nGraphFilterTaps, self.config.hiddenFeatures,self.config.nAttentionHeads)
-        exp_Setup_training = "TR_M{}p{}_{}Agent_".format(self.config.trained_map_w, self.config.trained_map_density,
-                                                                       self.config.trained_num_agents)
-        exp_Setup_testing = "TE_M{}p{}_{}Agent_".format(self.config.map_w, self.config.map_density,
-                                                                       self.config.num_agents)
+        exp_HyperPara = "{}_F{}_K{}_HS{}_P{}".format(
+            self.config.exp_net,
+            self.config.numInputFeatures,
+            self.config.nGraphFilterTaps,
+            self.config.hiddenFeatures,
+            self.config.nAttentionHeads,
+        )
+        exp_Setup_training = "TR_M{}p{}_{}Agent_".format(
+            self.config.trained_map_w,
+            self.config.trained_map_density,
+            self.config.trained_num_agents,
+        )
+        exp_Setup_testing = "TE_M{}p{}_{}Agent_".format(
+            self.config.map_w, self.config.map_density, self.config.num_agents
+        )
 
-
-        dsecription = exp_HyperPara + exp_Setup_training + exp_Setup_testing + "{}".format(self.config.exp_time)
+        dsecription = (
+            exp_HyperPara
+            + exp_Setup_training
+            + exp_Setup_testing
+            + "{}".format(self.config.exp_time)
+        )
         if self.config.id_env == None:
-            file_name = os.path.join(dir_name,'statistics_{}_{}_{}_comR_{}_{}_{}.mat'.format(dsecription, self.config.guidance, self.config.action_select, self.config.commR,self.config.data_set, log_epoch))
+            file_name = os.path.join(
+                dir_name,
+                "statistics_{}_{}_{}_comR_{}_{}_{}.mat".format(
+                    dsecription,
+                    self.config.guidance,
+                    self.config.action_select,
+                    self.config.commR,
+                    self.config.data_set,
+                    log_epoch,
+                ),
+            )
         else:
-            file_name = os.path.join(dir_name, 'statistics_{}_IDMAP{:5d}_{}_{}_comR_{}_{}_{}.mat'.format(dsecription, self.config.id_env, self.config.guidance, self.config.action_select,self.config.commR,self.config.data_set,log_epoch))
-        sio.savemat(file_name, self.save_statistics,appendmat=True, format='5',long_field_names=False, do_compression=False, oned_as='row')
+            file_name = os.path.join(
+                dir_name,
+                "statistics_{}_IDMAP{:5d}_{}_{}_comR_{}_{}_{}.mat".format(
+                    dsecription,
+                    self.config.id_env,
+                    self.config.guidance,
+                    self.config.action_select,
+                    self.config.commR,
+                    self.config.data_set,
+                    log_epoch,
+                ),
+            )
+        sio.savemat(
+            file_name,
+            self.save_statistics,
+            appendmat=True,
+            format="5",
+            long_field_names=False,
+            do_compression=False,
+            oned_as="row",
+        )
