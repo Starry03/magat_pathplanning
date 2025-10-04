@@ -1,6 +1,6 @@
 # Fork details
 
-Made to run on Orin nano (arm) with 8GB RAM.
+Made to run on Orin nano (arm) with 8GB RAM and to work on a university project based on this paper.
 
 ## Dependencies
 
@@ -34,7 +34,7 @@ cd ./offlineExpert
 
 | Multiprocessing and deadlocks
 
-On Orin Nano specifically, troubleshooting may cause deadlocks (I tried to fix this but it will deadlock during model training). If you look trough the commits, you will see several changes to the original code from the main repo, well I can't fix this. If you see just 1 deadlock, set the following flag everywhere
+On Orin Nano specifically, multiprocessing may cause deadlocks (I tried to fix this but it will deadlock during model training). If you look trough the commits, you will see several changes to the original code from the main repo, I just can't fix this. If you see just 1 deadlock, set the following flag everywhere
 ```sh
 --test_num_processes 0
 ```
