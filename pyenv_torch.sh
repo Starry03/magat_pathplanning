@@ -30,7 +30,7 @@ if [ ! -f cudss-local-tegra-repo-ubuntu2204-0.6.0_0.6.0-1_arm64.deb ]; then
 fi
 
 # missing dependencies ignored by requirements.txt :)
-python3 -m pip install opencv-python pyyaml hashids drawsvg==1.9.0 seaborn torchsummaryX
+python3 -m pip install opencv-python pyyaml hashids drawsvg==1.9.0 seaborn torchinfo
 sudo apt-get update
 sudo apt-get -y install libyaml-cpp-dev
 

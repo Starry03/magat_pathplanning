@@ -23,9 +23,9 @@
   "AttentionConcat": true,
   "hiddenFeatures": 128,
 
-  "num_test_trainingSet": 8000,
-  "num_validset": 1000,
-  "num_testset": 1000,
+  "num_test_trainingSet": 21000,
+  "num_validset": 4500,
+  "num_testset": 4500,
 
   "con_train": false,
   "test_general": false,

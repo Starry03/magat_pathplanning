@@ -14,7 +14,11 @@ from torch.nn import (
 )
 from torch_geometric.nn import GCNConv
 from torch.cuda import is_available
-from torch import isnan, ones_like, device
+from torch import isnan, ones_like
+try:
+    from torchinfo import summary
+except ImportError:
+    summary = None
 
 
 class PaperArchitecture(Module):
@@ -30,7 +34,7 @@ class PaperArchitecture(Module):
         super().__init__()
         self.logger = logging.getLogger("Agent")
         self.config = config
-        self.device = device("cuda" if config["cuda"] and is_available() else "cpu")
+        self.device = torch.device("cuda" if config["cuda"] and is_available() else "cpu")
 
         self.n_agents = config["num_agents"]
         self.FOV = config["FOV"]
@@ -47,10 +51,17 @@ class PaperArchitecture(Module):
         self.cgnn = GCNConv(128, 128)
         self.fc = Sequential(
             Flatten(),
-            Linear(128 * (self.wl // 8) * (self.hl // 8), 256),
+            Linear(128, 256),
             ReLU(),
             Linear(256, self.n_actions),
         )
+        self.to(self.device)
+        self.S = torch.ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
+        if summary is not None:
+            try:
+                summary(self, input_size=(1, self.n_agents, self.CHANNELS, self.wl, self.hl), device=self.device)
+            except Exception as e:
+                self.logger.debug(f"Model summary skipped: {e}")
 
     def _dense_to_edge_index(self, S: Tensor):
         """
@@ -145,12 +156,12 @@ class PaperArchitecture(Module):
         x = self.conv2(x)
         x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
 
+        # graph convolutional layer
         edge_index = self._dense_to_edge_index(self.S).to(self.device)
         feat = x.view(
             -1, 128
         )  # [B*N, 128] wl and hl are pooled out (only features remain)
         x = self.cgnn(feat, edge_index)  # [B*N, 128]
-        x = x.view(-1, 128, self.wl // 8, self.hl // 8)  # [B*N, 128, wl/8, hl/8]
 
         # fully connected layers
         x = self.fc(x)
