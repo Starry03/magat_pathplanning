@@ -659,8 +659,8 @@ class PaperArchitectureAgent(BaseAgent):
         self.recorder.reset()
         # maxstep = self.robot.getMaxstep()
         with torch.no_grad():
+            print("running on testing using", self.robot)
             for input, target, makespan, _, tensor_map in tqdm(dataloader, total=len(dataloader)):
-                print("running on testing using", self.robot)
                 inputGPU = input.to(self.model.device)
                 targetGPU = target.to(self.model.device)
 

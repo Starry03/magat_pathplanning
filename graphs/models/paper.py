@@ -10,11 +10,12 @@ from torch.nn import (
     Module,
     Sequential,
     BatchNorm2d,
-    Dropout2d,
+    Dropout,
 )
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, Sequential as GSequential
 from torch.cuda import is_available
 from torch import isnan, ones_like
+
 try:
     from torchinfo import summary
 except ImportError:
@@ -34,7 +35,9 @@ class PaperArchitecture(Module):
         super().__init__()
         self.logger = logging.getLogger("Agent")
         self.config = config
-        self.device = torch.device("cuda" if config["cuda"] and is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if config["cuda"] and is_available() else "cpu"
+        )
 
         self.n_agents = config["num_agents"]
         self.FOV = config["FOV"]
@@ -44,7 +47,7 @@ class PaperArchitecture(Module):
         self.E = 1  # Number of edge features
         self.nGraphFilterTaps = self.config["nGraphFilterTaps"]
 
-        self.drop = Dropout2d(p=0.2)
+        self.drop = Dropout(p=0.2)
         self.activation = ReLU(inplace=True)
         self.conv1 = self._conv_block(self.CHANNELS, 128)
         self.conv2 = self._conv_block(128, 128)
@@ -60,7 +63,12 @@ class PaperArchitecture(Module):
         self.S = torch.ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
         if summary is not None:
             try:
-                summary(self, input_size=(1, self.n_agents, self.CHANNELS, self.wl, self.hl), device=self.device)
+                summary(
+                    self,
+                    input_size=(1, self.n_agents, self.CHANNELS, self.wl, self.hl),
+                    batch_dim=config["batch_size_dim"],
+                    device=self.device,
+                )
             except Exception as e:
                 self.logger.debug(f"Model summary skipped: {e}")
 
@@ -136,18 +144,18 @@ class PaperArchitecture(Module):
             self.activation,
         )
 
-    def _graph_block(self, inp: int, output: int, k: int = 3) -> Sequential:
+    def _graph_block(self, inp: int, output: int, k: int = 3) -> GSequential:
         """
         k graph convolutional layers with ReLU activation
         node will have info from k-hop neighbors
         """
         layers = []
         for _ in range(k):
-            layers.append(GCNConv(inp, output))
+            layers.append((GCNConv(inp, output), "x, edge_index -> x"))
             layers.append(self.activation)
             layers.append(self.drop)
             inp = output
-        return Sequential(*layers)
+        return GSequential(input_args="x, edge_index", modules=layers)
 
     def _format_to_conv2d(self, x: Tensor) -> Tensor:
         """
@@ -174,10 +182,10 @@ class PaperArchitecture(Module):
 
         # graph convolutional layer
         edge_index = self._agents_to_edge_index(self.S).to(self.device)
-        feat = x.view(
+        x = x.view(
             -1, 128
         )  # [B*N, 128] wl and hl are pooled out (only features remain)
-        x = self.cgnn(feat, edge_index)  # [B*N, 128]
+        x = self.cgnn(x, edge_index)  # [B*N, 128]
 
         # fully connected layers
         x = self.fc(x)

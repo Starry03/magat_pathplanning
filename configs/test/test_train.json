@@ -32,7 +32,7 @@
   "weight_decay": 0.00001,
   "momentum": 0.9,
   "penaltyCollision": 0.05,
-  "max_epoch": 5,
+  "max_epoch": 50,
   "Start_onlineExpert": 0,
   "log_interval": 500,
   "log_loss_interval": 100,
