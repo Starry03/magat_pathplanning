@@ -646,6 +646,8 @@ class PaperArchitectureAgent(BaseAgent):
             dataloader = self.data_loader.test_loader
             label = "test"
         elif mode == "test_trainingSet":
+            self.logger.info("skipping test on training set")
+            return
             dataloader = self.data_loader.test_trainingSet_loader
             label = "test_training"
         else:

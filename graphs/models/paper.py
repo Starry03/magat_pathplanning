@@ -44,11 +44,12 @@ class PaperArchitecture(Module):
         self.E = 1  # Number of edge features
         self.nGraphFilterTaps = self.config["nGraphFilterTaps"]
 
+        self.drop = Dropout2d(p=0.2)
+        self.activation = ReLU(inplace=True)
         self.conv1 = self._conv_block(self.CHANNELS, 128)
         self.conv2 = self._conv_block(128, 128)
         self.conv3 = self._conv_block(128, 128)
-        self.drop = Dropout2d(p=0.2)
-        self.cgnn = GCNConv(128, 128)
+        self.cgnn = self._graph_block(128, 128, k=self.nGraphFilterTaps)
         self.fc = Sequential(
             Flatten(),
             Linear(128, 256),
@@ -122,7 +123,7 @@ class PaperArchitecture(Module):
                 padding=padding,
             ),
             BatchNorm2d(output),
-            ReLU(inplace=True),
+            self.activation,
             MaxPool2d(kernel_size=2, stride=2),
             Conv2d(
                 in_channels=output,
@@ -132,8 +133,21 @@ class PaperArchitecture(Module):
                 padding=padding,
             ),
             BatchNorm2d(output),
-            ReLU(),
+            self.activation,
         )
+
+    def _graph_block(self, inp: int, output: int, k: int = 3) -> Sequential:
+        """
+        k graph convolutional layers with ReLU activation
+        node will have info from k-hop neighbors
+        """
+        layers = []
+        for _ in range(k):
+            layers.append(GCNConv(inp, output))
+            layers.append(self.activation)
+            layers.append(self.drop)
+            inp = output
+        return Sequential(*layers)
 
     def _format_to_conv2d(self, x: Tensor) -> Tensor:
         """
@@ -153,7 +167,9 @@ class PaperArchitecture(Module):
         # convolutional layers
         x = self._format_to_conv2d(x).to(self.device)
         x = self.conv1(x)
+        x = self.drop(x)
         x = self.conv2(x)
+        x = self.drop(x)
         x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
 
         # graph convolutional layer
