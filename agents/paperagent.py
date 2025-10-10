@@ -659,8 +659,8 @@ class PaperArchitectureAgent(BaseAgent):
         with torch.no_grad():
             for input, target, makespan, _, tensor_map in tqdm(dataloader, total=len(dataloader)):
                 print("running on testing using", self.robot)
-                inputGPU = input.to(self.config.device)
-                targetGPU = target.to(self.config.device)
+                inputGPU = input.to(self.model.device)
+                targetGPU = target.to(self.model.device)
 
                 log_result = self.mutliAgent_ActionPolicy(
                     inputGPU,
