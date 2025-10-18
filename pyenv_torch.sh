@@ -5,38 +5,38 @@
 
 # base setup from original repo
 
+
+echo "Creating venv"
 python -m venv .venv
 source .venv/bin/activate
+
+echo "Installing packages from requirements.txt"
 pip install --upgrade pip
-
 pip install -r requirements.txt
-
-# fork adaptation for jetson
-
-# torch
-pip install https://pypi.jetson-ai-lab.io/jp6/cu126/+f/590/92ab729aee2b8/torch-2.8.0-cp310-cp310-linux_aarch64.whl#sha256=59092ab729aee2b8937d80cc1b35d1128275bd02a7e1bc911e7efa375bd97226
-
-# torchvision
-pip install https://pypi.jetson-ai-lab.io/jp6/cu126/+f/1c0/3de08a69e9554/torchvision-0.23.0-cp310-cp310-linux_aarch64.whl#sha256=1c03de08a69e95542024477e0cde95fab3436804917133d3f00e67629d3fe902
 
 # graph neural network (build from source)
 export TORCH_CUDA_ARCH_LIST="8.7"
 export FORCE_CUDA=1
+echo "Building from source torch graph neural network packages, this may take a while..."
 pip install --no-build-isolation --use-pep517 torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric
 
-# cudss
-if [ ! -f cudss-local-tegra-repo-ubuntu2204-0.6.0_0.6.0-1_arm64.deb ]; then
+# system dependencies
+echo "Installing system dependencies: libyaml-cpp-dev cudss"
+sudo apt-get update
+sudo apt-get -y install libyaml-cpp-dev
+
+apt list --installed | grep cudss
+HAS_CUDSS=$?
+
+if [ $HAS_CUDSS -ne 0 ]; then
     wget https://developer.download.nvidia.com/compute/cudss/0.6.0/local_installers/cudss-local-tegra-repo-ubuntu2204-0.6.0_0.6.0-1_arm64.deb
     sudo dpkg -i cudss-local-tegra-repo-ubuntu2204-0.6.0_0.6.0-1_arm64.deb
     sudo cp /var/cudss-local-tegra-repo-ubuntu2204-0.6.0/cudss-*-keyring.gpg /usr/share/keyrings/
     sudo apt-get update
     sudo apt-get -y install cudss
+    rm cudss-local-tegra-repo-ubuntu2204-0.6.0_0.6.0-1_arm64.deb
 fi
 
-# missing dependencies ignored by requirements.txt :)
-python3 -m pip install opencv-python pyyaml hashids drawsvg==1.9.0 seaborn torchinfo tensorflow
-sudo apt-get update
-sudo apt-get -y install libyaml-cpp-dev
-
 # test
+echo "Testing torch and torchvision installation (gpu detection)..."
 python -c "import torch; import torchvision; print(torch.__version__); print(torchvision.__version__); print('detected gpu' if torch.cuda.is_available() else 'no gpu detected')" | echo "torch and torchvision installed"

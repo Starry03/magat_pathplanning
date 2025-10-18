@@ -67,7 +67,7 @@ class PaperArchitecture(Module):
         )
         self.to(self.device)
         self.S = torch.ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
-        self.apply(weights_init)
+        # self.apply(weights_init) TODO: make this work
 
     def _agents_to_edge_index(self, S: Tensor):
         """
