@@ -22,3 +22,6 @@ build/
 maps/
 solutions/
 trainset/
+
+# extra
+article.pdf

@@ -1,4 +1,5 @@
 import logging
+
 from torch import Tensor
 import torch
 from torch.nn import (
@@ -11,15 +12,13 @@ from torch.nn import (
     Sequential,
     BatchNorm2d,
     Dropout,
+    AdaptiveAvgPool2d,
 )
 from torch_geometric.nn import GCNConv, Sequential as GSequential
 from torch.cuda import is_available
 from torch import isnan, ones_like
 
-try:
-    from torchinfo import summary
-except ImportError:
-    summary = None
+from graphs.weights_initializer import weights_init
 
 
 class PaperArchitecture(Module):
@@ -47,30 +46,28 @@ class PaperArchitecture(Module):
         self.E = 1  # Number of edge features
         self.nGraphFilterTaps = self.config["nGraphFilterTaps"]
 
+        # layers
+        self.pool = AdaptiveAvgPool2d((1, 1))
         self.drop = Dropout(p=0.2)
         self.activation = ReLU(inplace=True)
-        self.conv1 = self._conv_block(self.CHANNELS, 128)
-        self.conv2 = self._conv_block(128, 128)
-        self.conv3 = self._conv_block(128, 128)
+        self.conv1 = self._conv_block(self.CHANNELS, 32)
+        self.conv2 = self._conv_block(32, 64)
+        self.conv3 = self._conv_block(64, 128)
+        self.compress = Sequential(
+            Conv2d(128, 128, kernel_size=1, stride=1, padding=0),
+            BatchNorm2d(128),
+            self.activation,
+        )
+        self.flatten = Flatten()
         self.cgnn = self._graph_block(128, 128, k=self.nGraphFilterTaps)
         self.fc = Sequential(
-            Flatten(),
             Linear(128, 256),
             ReLU(),
             Linear(256, self.n_actions),
         )
         self.to(self.device)
         self.S = torch.ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
-        if summary is not None:
-            try:
-                summary(
-                    self,
-                    input_size=(1, self.n_agents, self.CHANNELS, self.wl, self.hl),
-                    batch_dim=config["batch_size_dim"],
-                    device=self.device,
-                )
-            except Exception as e:
-                self.logger.debug(f"Model summary skipped: {e}")
+        self.apply(weights_init)
 
     def _agents_to_edge_index(self, S: Tensor):
         """
@@ -112,7 +109,8 @@ class PaperArchitecture(Module):
         if self.config["GSO_mode"] == "dist_GSO_one":
             self.S[self.S > 0] = 1
         elif self.config["GSO_mode"] == "full_GSO":
-            self.S = ones_like(self.S).to(self.device)
+            self.S = ones_like(self.S)
+        self.S = self.S.to(self.device)
 
     def _conv_block(
         self,
@@ -163,8 +161,7 @@ class PaperArchitecture(Module):
         so we merge B and N dimensions to avoid looping
         """
         (B, N, C, W, H) = x.shape
-        x = x.view(B * N, C, W, H)
-        return x
+        return x.view(B * N, C, W, H)
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -179,12 +176,11 @@ class PaperArchitecture(Module):
         x = self.conv2(x)
         x = self.drop(x)
         x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
+        x = self.pool(x)  # output [B*N, 128, 1, 1]
+        x = self.compress(x)
 
         # graph convolutional layer
         edge_index = self._agents_to_edge_index(self.S).to(self.device)
-        x = x.view(
-            -1, 128
-        )  # [B*N, 128] wl and hl are pooled out (only features remain)
         x = self.cgnn(x, edge_index)  # [B*N, 128]
 
         # fully connected layers
