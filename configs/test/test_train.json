@@ -43,6 +43,7 @@
   "batch_size": 64,
   "valid_batch_size": 1,
   "test_batch_size": 1,
-  "test_num_processes": 1
+  "test_num_processes": 1,
+  "fov": 4
 }
 

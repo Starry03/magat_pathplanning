@@ -39,7 +39,7 @@ class PaperArchitecture(Module):
         )
 
         self.n_agents = config["num_agents"]
-        self.FOV = config["FOV"]
+        self.FOV = config["fov"]
         self.wl, self.hl = self.FOV + 2, self.FOV + 2  # from paper
         self.CHANNELS: int = 3  # agents, obstacles, goals
         self.n_actions: int = 5  # stay, up, down, left, right
@@ -178,7 +178,8 @@ class PaperArchitecture(Module):
         x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
         x = self.pool(x)  # output [B*N, 128, 1, 1]
         x = self.compress(x)
-
+        x = self.flatten(x)  # output [B*N, 128]
+        
         # graph convolutional layer
         edge_index = self._agents_to_edge_index(self.S).to(self.device)
         x = self.cgnn(x, edge_index)  # [B*N, 128]
