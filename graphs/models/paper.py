@@ -115,6 +115,12 @@ class PaperArchitecture(Module):
         kernel_size: int = 3,
         stride: int = 1,
         padding: int = 1,
+        eps: float = 1e-5,
+        momentum: float = 0.1,
+        affine: bool = True,
+        track_running_stats: bool = True,
+        dilation: int = 1,
+        ceiling_mode: bool = False,
     ) -> Sequential:
         return Sequential(
             Conv2d(
@@ -124,9 +130,15 @@ class PaperArchitecture(Module):
                 stride=stride,
                 padding=padding,
             ),
-            BatchNorm2d(output),
+            BatchNorm2d(output, eps, momentum, affine, track_running_stats),
             self.activation,
-            MaxPool2d(kernel_size=2, stride=2),
+            MaxPool2d(
+                kernel_size=2,
+                stride=2,
+                padding=0,
+                dilation=dilation,
+                ceil_mode=ceiling_mode,
+            ),
             Conv2d(
                 in_channels=output,
                 out_channels=output,
@@ -134,7 +146,7 @@ class PaperArchitecture(Module):
                 stride=stride,
                 padding=padding,
             ),
-            BatchNorm2d(output),
+            BatchNorm2d(output, eps, momentum, affine, track_running_stats),
             self.activation,
         )
 
@@ -145,7 +157,7 @@ class PaperArchitecture(Module):
         """
         layers = []
         for _ in range(k):
-            layers.append((GCNConv(inp, output), "x, edge_index -> x"))
+            layers.append((GCNConv(inp, output, improved=True), "x, edge_index -> x"))
             layers.append(self.activation)
             layers.append(self.drop)
             inp = output
@@ -188,5 +200,6 @@ class PaperArchitecture(Module):
         # x = self.cgnn(x, edge_index)  # [B*N, 128]
 
         # fully connected layers
+        # x = self.activation(x)
         # x = self.fc(x)
-        return self.fc(self.cgnn(x, edge_index))
+        return self.fc(self.activation(self.cgnn(x, edge_index)))

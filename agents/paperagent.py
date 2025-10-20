@@ -177,9 +177,9 @@ class PaperArchitectureAgent(BaseAgent):
             self.train_one_epoch = self.train_one_epoch_Batch
             self.test_step = self.test_step_Batch
         self.summary_writer = SummaryWriter(
-            log_dir="-"
-            + self.config["summary_dir"]
-            + f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}/",
+            # log_dir="-" +
+                self.config["summary_dir"],
+            # + f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}/",
             comment="NerualMAPF",
         )
         self.plot_graph = True

@@ -28,7 +28,7 @@ source .venv/bin/activate
 ## test
 
 python main.py configs/test/test_train.json --mode train \
-    --map_density 1 --map_w 20 --num_agents 10 --nGraphFilterTaps 2   \
+    --map_density 1 --map_w 20 --num_agents 10 --nGraphFilterTaps 3   \
     --trained_num_agents 10 --commR 7 --GSO_mode dist_GSO --update_valid_set 1000 \
     --update_valid_set_epoch 70 --threshold_SuccessRate 97 --default_actionSelect \
     --guidance Project_G \
