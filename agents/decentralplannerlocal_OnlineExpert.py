@@ -318,7 +318,7 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
             self.current_epoch = epoch
             # TODO: Optional 1: del dataloader before train
 
-            self.train_one_epoch()
+            # self.train_one_epoch()
             self.logger.info('Train {} on Epoch {}: Learning Rate: {}]'.format(self.config.exp_name, self.current_epoch,
                                                                                self.scheduler.get_lr()))
             print('Train {} on Epoch {} Learning Rate: {}'.format(self.config.exp_name, self.current_epoch,
@@ -653,6 +653,8 @@ class DecentralPlannerAgentLocalWithOnlineExpert(BaseAgent):
             label = 'test_training'
             if self.switch_toOnlineExpert:
                 self.robot.createfolder_failure_cases()
+            self.logger.info('Skipping test_trainingSet...')
+            return
         else:
             dataloader = self.data_loader.valid_loader
             label = 'valid'

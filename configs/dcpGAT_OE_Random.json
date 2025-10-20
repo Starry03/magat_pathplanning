@@ -7,6 +7,8 @@
   "save_data": "./Data/",
   "save_tb_data": "./Data/Tensorboard",
 
+  "failCases_dir": "./onlineExpert/failureCases",
+
 
   "map_w": 20,
   "map_h": 20,

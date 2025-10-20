@@ -131,8 +131,6 @@ class MonitoringMultiAgentPerformance:
             compare_makespan,
             compare_flowtime,
             num_agents_reachgoal,
-            store_GSO,
-            store_communication_radius,
             time_record,
             Time_cases_ForwardPass,
         ] = log_result
