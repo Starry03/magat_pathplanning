@@ -5,6 +5,7 @@
   "data_root": "/home/starry/Documents/uni_project/magat_pathplanning/offlineExpert/trainset/",
   "save_data": "./Data/",
   "save_tb_data": "./Data/Tensorboard",
+  "summary_dir": "./Data/Tensorboard/PaperArchitecture_map20x20_rho1_10Agent/K2_HS0",
   "map_w": 20,
   "map_h": 20,
   "map_density": 0.1,

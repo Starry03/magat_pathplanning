@@ -1,4 +1,5 @@
 import shutil
+import datetime
 
 from fnmatch import fnmatch
 import os
@@ -45,7 +46,7 @@ from utils.misc import print_cuda_statistics
 
 # test
 from graphs.models.paper import PaperArchitecture
-from tqdm import tqdm, trange
+from tqdm import tqdm
 
 cudnn.benchmark = True
 
@@ -175,9 +176,11 @@ class PaperArchitectureAgent(BaseAgent):
         else:
             self.train_one_epoch = self.train_one_epoch_Batch
             self.test_step = self.test_step_Batch
-
         self.summary_writer = SummaryWriter(
-            log_dir=self.config.summary_dir, comment="NerualMAPP"
+            log_dir="-"
+            + self.config["summary_dir"]
+            + f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}/",
+            comment="NerualMAPF",
         )
         self.plot_graph = True
         self.save_dump_input = False
@@ -466,7 +469,8 @@ class PaperArchitectureAgent(BaseAgent):
 
         log_loss_validStep = []
         for batch_idx, (batch_input, batch_target, _, batch_GSO, _) in tqdm(
-            self.data_loader.validStep_loader, total=len(self.data_loader.validStep_loader)
+            self.data_loader.validStep_loader,
+            total=len(self.data_loader.validStep_loader),
         ):
 
             inputGPU = batch_input.to(self.config.device)
@@ -660,7 +664,9 @@ class PaperArchitectureAgent(BaseAgent):
         # maxstep = self.robot.getMaxstep()
         with torch.no_grad():
             print("running on testing using", self.robot)
-            for input, target, makespan, _, tensor_map in tqdm(dataloader, total=len(dataloader)):
+            for input, target, makespan, _, tensor_map in tqdm(
+                dataloader, total=len(dataloader)
+            ):
                 inputGPU = input.to(self.model.device)
                 targetGPU = target.to(self.model.device)
 

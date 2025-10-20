@@ -60,11 +60,7 @@ class PaperArchitecture(Module):
         )
         self.flatten = Flatten()
         self.cgnn = self._graph_block(128, 128, k=self.nGraphFilterTaps)
-        self.fc = Sequential(
-            Linear(128, 256),
-            ReLU(),
-            Linear(256, self.n_actions),
-        )
+        self.fc = Linear(128, self.n_actions)
         self.to(self.device)
         self.S = torch.ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
         # self.apply(weights_init) TODO: make this work
@@ -171,19 +167,26 @@ class PaperArchitecture(Module):
         """
         # convolutional layers
         x = self._format_to_conv2d(x).to(self.device)
-        x = self.conv1(x)
-        x = self.drop(x)
-        x = self.conv2(x)
-        x = self.drop(x)
-        x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
-        x = self.pool(x)  # output [B*N, 128, 1, 1]
-        x = self.compress(x)
-        x = self.flatten(x)  # output [B*N, 128]
-        
+
+        # x = self.conv1(x)
+        # x = self.drop(x)
+        # x = self.conv2(x)
+        # x = self.drop(x)
+        # x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
+        # x = self.pool(x)  # output [B*N, 128, 1, 1]
+        # x = self.compress(x)
+        # x = self.flatten(x)  # output [B*N, 128]
+
+        x = self.flatten(
+            self.compress(
+                self.pool(self.conv3(self.drop(self.conv2(self.drop(self.conv1(x))))))
+            )
+        )
+
         # graph convolutional layer
         edge_index = self._agents_to_edge_index(self.S).to(self.device)
-        x = self.cgnn(x, edge_index)  # [B*N, 128]
+        # x = self.cgnn(x, edge_index)  # [B*N, 128]
 
         # fully connected layers
-        x = self.fc(x)
-        return x
+        # x = self.fc(x)
+        return self.fc(self.cgnn(x, edge_index))

@@ -334,7 +334,6 @@ class DecentralPlannerNet(nn.Module):
 
 
     def addGSO(self, S):
-
         # We add the GSO on real time, this GSO also depends on time and has
         # shape either B x N x N or B x E x N x N
         if self.E == 1:  # It is B x T x N x N
