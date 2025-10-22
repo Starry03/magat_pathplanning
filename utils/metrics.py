@@ -131,6 +131,8 @@ class MonitoringMultiAgentPerformance:
             compare_makespan,
             compare_flowtime,
             num_agents_reachgoal,
+            store_GSO,
+            store_communication_radius,
             time_record,
             Time_cases_ForwardPass,
         ] = log_result
@@ -155,6 +157,19 @@ class MonitoringMultiAgentPerformance:
 
         self.list_compareMP.append(compare_makespan)
         self.list_compareFT.append(compare_flowtime)
+
+        # store GSO and communication radius info for analysis
+        try:
+            # initialize lists if they don't exist
+            if not hasattr(self, "listCase_GSO") or self.listCase_GSO is None:
+                self.listCase_GSO = []
+            if not hasattr(self, "listCase_commRadius") or self.listCase_commRadius is None:
+                self.listCase_commRadius = []
+            self.listCase_GSO.append(store_GSO)
+            self.listCase_commRadius.append(store_communication_radius)
+        except Exception:
+            # If storing fails, just skip (backwards compatibility)
+            pass
 
         self.list_rate_deltaMP.append(rate_deltaMP)
         self.list_rate_deltaFT.append(rate_deltaFT)

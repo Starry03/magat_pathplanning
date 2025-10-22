@@ -39,7 +39,7 @@ class PaperArchitecture(Module):
         )
 
         self.n_agents = config["num_agents"]
-        self.FOV = config["fov"]
+        self.FOV = config.get("FOV", config.get("fov", 4))  # support both FOV and fov, default 9
         self.wl, self.hl = self.FOV + 2, self.FOV + 2  # from paper
         self.CHANNELS: int = 3  # agents, obstacles, goals
         self.n_actions: int = 5  # stay, up, down, left, right

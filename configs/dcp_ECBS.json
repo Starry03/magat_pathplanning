@@ -3,7 +3,7 @@
   "agent": "DecentralPlannerAgentLocal",
   "data_loader": "DecentralPlannerDataLoader",
 
-  "data_root": "./Data/DataSource_DMap_FixedComR/EffectiveDensity/Training",
+  "data_root": "/home/starry/Documents/uni_project/magat_pathplanning/offlineExpert/trainset/",
   "save_data": "./Data/",
   "save_tb_data": "./Data/Tensorboard",
 

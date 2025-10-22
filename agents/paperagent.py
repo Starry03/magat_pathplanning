@@ -178,7 +178,7 @@ class PaperArchitectureAgent(BaseAgent):
             self.test_step = self.test_step_Batch
         self.summary_writer = SummaryWriter(
             # log_dir="-" +
-                self.config["summary_dir"],
+            self.config["summary_dir"],
             # + f"{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}/",
             comment="NerualMAPF",
         )
