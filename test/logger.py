@@ -15,4 +15,3 @@ handler.setFormatter(colorlog.ColoredFormatter(
 
 logger = logging.getLogger('PaperAgentLogger')
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)

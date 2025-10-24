@@ -62,7 +62,10 @@ class AgentState:
         vector[-pad_width[1]:] = pad_value
 
     def setmap(self, map_channel):
-        self.map_global = np.array(map_channel,dtype=np.int64)
+        if isinstance(map_channel, torch.Tensor):
+            map_channel = map_channel.detach().cpu().numpy()
+
+        self.map_global = np.array(map_channel, dtype=np.int64)
         self.map_pad = np.pad(map_channel, self.FOV_width, self.pad_with, padder=1).astype(np.int64)
         # print(self.map_pad.shape)
 

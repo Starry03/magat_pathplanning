@@ -1,6 +1,8 @@
 import sys
 import pathlib
 import datetime
+import argparse
+
 
 # Ensure project root is on sys.path so top-level packages (dataloader, utils, graphs, ...)
 # can be imported when this script is run directly from anywhere
@@ -12,10 +14,9 @@ from lightning import Trainer
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch import set_float32_matmul_precision
 
-import argparse
 
 from dataloader.Dataloader_dcplocal_notTF_onlineExpert import DecentralPlannerDataLoader
-from model import PaperArchitecture
+from test.model import PaperArchitecture
 from utils.config import process_config
 
 
@@ -154,23 +155,30 @@ def main() -> None:
 
     config = process_config(arg_parser.parse_args())
     model = PaperArchitecture(config)
+    # model = PaperArchitecture.load_from_checkpoint(
+    #     "./tb_logs/2025-10-24 12:16:40.180986/version_0/checkpoints/epoch=0-step=8818.ckpt",
+    #     config=config,
+    # )
     trainer = Trainer(
         accelerator="gpu",
         max_epochs=config.get("max_epochs", 10),
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
+        enable_checkpointing=True,
+        enable_model_summary=True,
+        enable_progress_bar=True,
     )
     data_loader = DecentralPlannerDataLoader(config=config)
     if config.get("mode") == "test":
-        trainer.test(
-            model,
-            dataloaders=data_loader.test_loader,
-        )
+        model.test_single(config.get("mode"), data_loader)
         return
     trainer.fit(
         model,
         train_dataloaders=data_loader.train_loader,
-        val_dataloaders=data_loader.validStep_loader,
+        val_dataloaders=data_loader.valid_loader,
     )
+    config["mode"] = "test"
+    data_loader = DecentralPlannerDataLoader(config=config)
+    model.test_single(config.get("mode"), data_loader)
 
 
 if __name__ == "__main__":

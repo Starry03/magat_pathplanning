@@ -1,3 +1,4 @@
+from logging import config
 import time
 
 import lightning as pl
@@ -18,7 +19,9 @@ import torch
 from torch_geometric.nn import GCNConv, ChebConv, Sequential as GSequential
 from torch.optim import Adam, lr_scheduler
 from torchmetrics import Accuracy
+from tqdm import tqdm
 
+from dataloader.Dataloader_dcplocal_notTF_onlineExpert import DecentralPlannerDataLoader
 from utils.metrics import MonitoringMultiAgentPerformance
 from utils.new_simulator import multiRobotSimNew
 from logger import logger
@@ -35,11 +38,11 @@ class PaperArchitecture(pl.LightningModule):
         self.n_actions: int = 5
         self.E = 1
         self.nGraphFilterTaps = self.config["nGraphFilterTaps"]
-        self.robot = multiRobotSimNew(self.config)
-        self.recorder = MonitoringMultiAgentPerformance(self.config)
         self.loss = CrossEntropyLoss()
         self.train_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
+        self.robot = multiRobotSimNew(config)
+        self.recorder = MonitoringMultiAgentPerformance(self.config)
 
         # layers
         self.pool = AdaptiveAvgPool2d((1, 1))
@@ -234,7 +237,7 @@ class PaperArchitecture(pl.LightningModule):
         self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         return loss
 
-    def mutliAgent_ActionPolicy(
+    def multiAgent_ActionPolicy(
         self, input, load_target, makespanTarget, tensor_map, ID_dataset, mode
     ):
         self.robot.setup(
@@ -255,10 +258,10 @@ class PaperArchitecture(pl.LightningModule):
         for step in range(maxstep):
             currentStep = step + 1
             currentState = self.robot.getCurrentState()
-            currentStateGPU = currentState.to(self.config.device)
+            currentStateGPU = currentState.to(self.device)
 
             gso = self.robot.getGSO(step)
-            gsoGPU = gso.to(self.config.device)
+            gsoGPU = gso.to(self.device)
             self.addGSO(gsoGPU)
             step_start = time.time()
             actionVec_predict = self(currentStateGPU)  # B x N X 5
@@ -346,44 +349,6 @@ class PaperArchitecture(pl.LightningModule):
             Time_cases_ForwardPass,
         )
 
-    def test_step(self, batch, batch_idx):
-        """
-
-        single dim batch
-        """
-        logger.info("test started")
-        self.recorder.reset()
-        (
-            batch_input,
-            batch_target,
-            batch_makespanTarget,
-            batch_tensor_map,
-            batch_ID_dataset,
-        ) = batch
-        log_result = self.mutliAgent_ActionPolicy(
-            batch_input,
-            batch_target,
-            batch_makespanTarget,
-            batch_tensor_map,
-            self.recorder.count_validset,
-            mode="test",
-        )
-        self.recorder.update(self.robot.getMaxstep(), log_result)
-        logger.info(
-            "Accurracy(reachGoalnoCollision): {} \n  "
-            "DeteriorationRate(MakeSpan): {} \n  "
-            "DeteriorationRate(FlowTime): {} \n  "
-            "Rate(collisionPredictedinLoop): {} \n  "
-            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
-                round(self.recorder.rateReachGoal, 4),
-                round(self.recorder.avg_rate_deltaMP, 4),
-                round(self.recorder.avg_rate_deltaFT, 4),
-                round(self.recorder.rateCollisionPredictedinLoop, 4),
-                round(self.recorder.rateFailedReachGoalSH, 4),
-            )
-        )
-        return self.recorder.rateReachGoal
-
     def configure_optimizers(self):
         optimizer = Adam(
             self.parameters(),
@@ -399,3 +364,53 @@ class PaperArchitecture(pl.LightningModule):
             "optimizer": optimizer,
             "lr_scheduler": scheduler,
         }
+
+    def test_single(self, mode, data_loader: DecentralPlannerDataLoader):
+        """
+        One cycle of model validation
+        :return:
+        """
+        logger.info("test started")
+        self.eval()
+        if mode == "test":
+            dataloader = data_loader.test_loader
+            label = "test"
+        elif mode == "test_trainingSet":
+            dataloader = data_loader.test_trainingSet_loader
+            label = "test_training"
+        else:
+            dataloader = data_loader.valid_loader
+            label = "valid"
+
+        self.recorder.reset()
+        with torch.no_grad():
+            for input, target, makespan, _, tensor_map in tqdm(
+                dataloader, desc=f"Testing on {label} set", total=len(dataloader)
+            ):
+                inputGPU = input.to(self.device)
+                targetGPU = target.to(self.device)
+                log_result = self.multiAgent_ActionPolicy(
+                    inputGPU,
+                    targetGPU,
+                    makespan,
+                    tensor_map,
+                    self.recorder.count_validset,
+                    mode,
+                )
+                self.recorder.update(self.robot.getMaxstep(), log_result)
+                logger.info("current rateReachGoal: {}".format(self.recorder.rateReachGoal))
+
+        logger.info(
+            "Accurracy(reachGoalnoCollision): {} \n  "
+            "DeteriorationRate(MakeSpan): {} \n  "
+            "DeteriorationRate(FlowTime): {} \n  "
+            "Rate(collisionPredictedinLoop): {} \n  "
+            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
+                round(self.recorder.rateReachGoal, 4),
+                round(self.recorder.avg_rate_deltaMP, 4),
+                round(self.recorder.avg_rate_deltaFT, 4),
+                round(self.recorder.rateCollisionPredictedinLoop, 4),
+                round(self.recorder.rateFailedReachGoalSH, 4),
+            )
+        )
+        return self.recorder.rateReachGoal

@@ -25,6 +25,7 @@
   "con_train": false,
   "test_general": false,
   "train_TL": false,
+  "device": "cuda",
   "cuda": true,
   "gpu_device": 0,
   "checkpoint_file": "checkpoint.pth.tar",
@@ -45,5 +46,6 @@
   "valid_batch_size": 1,
   "test_batch_size": 1,
   "test_num_processes": 1,
-  "FOV": 4
+  "FOV": 4,
+  "exp_time": "2024-06-15_15-30-00"
 }
