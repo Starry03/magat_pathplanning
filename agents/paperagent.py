@@ -647,6 +647,7 @@ class PaperArchitectureAgent(BaseAgent):
         """
         self.model.eval()
         if mode == "test":
+            self.logger.info("running test on test set")
             dataloader = self.data_loader.test_loader
             label = "test"
         elif mode == "test_trainingSet":
@@ -655,6 +656,7 @@ class PaperArchitectureAgent(BaseAgent):
             dataloader = self.data_loader.test_trainingSet_loader
             label = "test_training"
         else:
+            self.logger.info("running test on validation set")
             dataloader = self.data_loader.valid_loader
             label = "valid"
 

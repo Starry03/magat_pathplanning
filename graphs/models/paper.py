@@ -14,7 +14,7 @@ from torch.nn import (
     Dropout,
     AdaptiveAvgPool2d,
 )
-from torch_geometric.nn import GCNConv, Sequential as GSequential
+from torch_geometric.nn import GCNConv, ChebConv, Sequential as GSequential
 from torch.cuda import is_available
 from torch import isnan, ones_like
 
@@ -39,7 +39,9 @@ class PaperArchitecture(Module):
         )
 
         self.n_agents = config["num_agents"]
-        self.FOV = config.get("FOV", config.get("fov", 4))  # support both FOV and fov, default 9
+        self.FOV = config.get(
+            "FOV", config.get("fov", 4)
+        )  # support both FOV and fov, default 9
         self.wl, self.hl = self.FOV + 2, self.FOV + 2  # from paper
         self.CHANNELS: int = 3  # agents, obstacles, goals
         self.n_actions: int = 5  # stay, up, down, left, right
@@ -59,11 +61,20 @@ class PaperArchitecture(Module):
             self.activation,
         )
         self.flatten = Flatten()
-        self.cgnn = self._graph_block(128, 128, k=self.nGraphFilterTaps)
+
+        self.cgnn = ChebConv(
+            in_channels=128,
+            out_channels=128,
+            K=self.nGraphFilterTaps,  # K-hop polynomial filter
+            normalization="sym",  # Symmetric normalization (I - D^{-1/2} A D^{-1/2})
+        )
+
+        # Option 2: Stack of K GCN layers (previous approach)
+        # self.cgnn = self._graph_block(128, 128, k=self.nGraphFilterTaps)
+
         self.fc = Linear(128, self.n_actions)
         self.to(self.device)
         self.S = torch.ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
-        # self.apply(weights_init) TODO: make this work
 
     def _agents_to_edge_index(self, S: Tensor):
         """
@@ -92,9 +103,10 @@ class PaperArchitecture(Module):
 
         this function refers to the original one in the repository
         """
-        if self.E == 1:  # It is B x T x N x N
+        self.logger.debug(f"Adding GSO with shape {S.shape} to the model")
+        if self.E == 1:
             assert len(S.shape) == 3
-            self.S = S.unsqueeze(1)  # B x E x N x N
+            self.S = S.unsqueeze(1)
         else:
             assert len(S.shape) == 4
             assert S.shape[1] == self.E
@@ -179,27 +191,18 @@ class PaperArchitecture(Module):
         """
         # convolutional layers
         x = self._format_to_conv2d(x).to(self.device)
-
-        # x = self.conv1(x)
-        # x = self.drop(x)
-        # x = self.conv2(x)
-        # x = self.drop(x)
-        # x = self.conv3(x)  # output [B*N, 128, wl//8, hl//8]
-        # x = self.pool(x)  # output [B*N, 128, 1, 1]
-        # x = self.compress(x)
-        # x = self.flatten(x)  # output [B*N, 128]
-
         x = self.flatten(
             self.compress(
                 self.pool(self.conv3(self.drop(self.conv2(self.drop(self.conv1(x))))))
             )
-        )
+        )  # output [B*N, 128]
 
-        # graph convolutional layer
+        # graph convolutional layer with K-hop filter taps
         edge_index = self._agents_to_edge_index(self.S).to(self.device)
-        # x = self.cgnn(x, edge_index)  # [B*N, 128]
+        x = self.cgnn(x, edge_index)  # [B*N, 128]
 
         # fully connected layers
-        # x = self.activation(x)
-        # x = self.fc(x)
-        return self.fc(self.activation(self.cgnn(x, edge_index)))
+        x = self.activation(x)
+        x = self.fc(x)  # [B*N, n_actions]
+
+        return x

@@ -5,7 +5,7 @@
   "data_root": "/home/starry/Documents/uni_project/magat_pathplanning/offlineExpert/trainset/",
   "save_data": "./Data/",
   "save_tb_data": "./Data/Tensorboard",
-  "summary_dir": "./Data/Tensorboard/PaperArchitecture_map20x20_rho1_10Agent/K3_HS0",
+  "summary_dir": "./Data/Tensorboard/PaperArchitecture_map20x20_rho1_10Agent/K2_HS0",
   "map_w": 20,
   "map_h": 20,
   "map_density": 0.1,
@@ -33,7 +33,7 @@
   "weight_decay": 0.00001,
   "momentum": 0.9,
   "penaltyCollision": 0.05,
-  "max_epoch": 150,
+  "max_epoch": 50,
   "Start_onlineExpert": 0,
   "log_interval": 500,
   "log_loss_interval": 100,
@@ -45,6 +45,5 @@
   "valid_batch_size": 1,
   "test_batch_size": 1,
   "test_num_processes": 1,
-  "fov": 4
+  "FOV": 4
 }
-

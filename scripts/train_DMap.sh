@@ -25,6 +25,10 @@
 
 source .venv/bin/activate
 
+# get current time
+now=$(date +"%Y%m%d_%H%M%S")
+echo "Current time: $now"
+
 ## test
 
 python main.py configs/test/test_train.json --mode train \
@@ -35,10 +39,10 @@ python main.py configs/test/test_train.json --mode train \
     --update_valid_set 1000 \
     --update_valid_set_epoch 70 --threshold_SuccessRate 97 --default_actionSelect \
     --guidance Project_G \
-    --test_num_processes 0
+    --test_num_processes 0 \
+    --tb_ExpName PaperArchitecture_TestRun_${now} \
     # --CNN_mode ResNetLarge_withMLP \
     # --batch_numAgent true \
-    # --tb_ExpName GNN_Resnet_3Block_distGSO_baseline_128
 
 ## GAT 128
 

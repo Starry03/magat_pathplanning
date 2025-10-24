@@ -40,3 +40,13 @@ On Orin Nano specifically, multiprocessing may cause deadlocks (I tried to fix t
 ```
 
 ## Training
+
+```sh
+cd ./test
+./run.sh
+```
+
+### First impressions
+
+Model trains quickly on single steps, reaching 0.96% of accuracy in no time.
+However, the action policy says accuracy is calculated on the full path, which has to be tested.
