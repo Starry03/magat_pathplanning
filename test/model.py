@@ -1,9 +1,7 @@
-from logging import config
-import time
-
-import lightning as pl
-from torch import Tensor, stack, empty, cat, long, isnan, ones_like, max as tmax, ones
+from torch import Tensor, stack, empty, cat, long, isnan, ones, Size
+import torch
 from torch.nn import (
+    Module,
     Conv2d,
     Linear,
     Flatten,
@@ -13,41 +11,27 @@ from torch.nn import (
     BatchNorm2d,
     Dropout,
     AdaptiveAvgPool2d,
-    CrossEntropyLoss,
 )
-import torch
 from torch_geometric.nn import GCNConv, ChebConv, Sequential as GSequential
-from torch.optim import Adam, lr_scheduler
-from torchmetrics import Accuracy
-from tqdm import tqdm
-
-from dataloader.Dataloader_dcplocal_notTF_onlineExpert import DecentralPlannerDataLoader
-from utils.metrics import MonitoringMultiAgentPerformance
-from utils.new_simulator import multiRobotSimNew
-from logger import logger
 
 
-class PaperArchitecture(pl.LightningModule):
-    def __init__(self, config) -> None:
+class Model(Module):
+    def __init__(self) -> None:
         super().__init__()
-        self.config = config
-        self.n_agents = config["num_agents"]
-        self.FOV = config.get("FOV", 4)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        self.n_agents = 10
+        self.FOV = 4
         self.wl, self.hl = self.FOV + 2, self.FOV + 2
         self.CHANNELS: int = 3
         self.n_actions: int = 5
         self.E = 1
-        self.nGraphFilterTaps = self.config["nGraphFilterTaps"]
-        self.loss = CrossEntropyLoss()
-        self.train_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
-        self.val_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
-        self.robot = multiRobotSimNew(config)
-        self.recorder = MonitoringMultiAgentPerformance(self.config)
+        self.nGraphFilterTaps = 3
 
         # layers
         self.pool = AdaptiveAvgPool2d((1, 1))
         self.drop = Dropout(p=0.2)
-        self.activation = ReLU(inplace=True)
+        self.activation = ReLU(inplace=False)
         self.conv1 = self._conv_block(self.CHANNELS, 32)
         self.conv2 = self._conv_block(32, 64)
         self.conv3 = self._conv_block(64, 128)
@@ -57,41 +41,42 @@ class PaperArchitecture(pl.LightningModule):
             self.activation,
         )
         self.flatten = Flatten()
-
-        self.cgnn = ChebConv(
-            in_channels=128,
-            out_channels=128,
-            K=self.nGraphFilterTaps,  # K-hop polynomial filter
-            normalization="sym",  # Symmetric normalization (I - D^{-1/2} A D^{-1/2})
-        )
-
-        # Option 2: Stack of K GCN layers (previous approach)
-        # self.cgnn = self._graph_block(128, 128, k=self.nGraphFilterTaps)
-
-        self.fc = Linear(128, self.n_actions)
+        self.flatten = Flatten()
+        # self.cgnn = ChebConv(
+        #     in_channels=128,
+        #     out_channels=128,
+        #     K=self.nGraphFilterTaps,  # K-hop polynomial filter
+        #     normalization="sym",  # Symmetric normalization (I - D^{-1/2} A D^{-1/2})
+        # )
+        # self.cgnn = self._graph_block_paper()
+        self.fc = Linear(128 * self.nGraphFilterTaps, self.n_actions)
         self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
-
 
     def _agents_to_edge_index(self, S: Tensor):
         """
-
+        Vectorized edge index computation
         return: edge_index in shape [2, E]
         """
         B, _, N, _ = S.shape
-        rows, cols = [], []
-        for b in range(B):
-            idx = (S[b] > 0).nonzero(as_tuple=False)  # coppie (i,j)
-            if idx.numel() == 0:
-                continue
-
-            # geometric offset to have a single big graph
-            rows.append(idx[:, 0] + b * N)
-            cols.append(idx[:, 1] + b * N)
-        if not rows:
+        
+        # Find all non-zero entries in S [B, E, N, N]
+        # indices will be [num_edges, 4] -> (b, e, i, j)
+        indices = S.nonzero(as_tuple=False)
+        
+        if indices.numel() == 0:
             return empty(2, 0, dtype=long, device=S.device)
-
-        # concatenate all batches
-        return stack([cat(rows), cat(cols)], dim=0)
+            
+        b_idx = indices[:, 0]
+        row_idx = indices[:, 2]
+        col_idx = indices[:, 3]
+        
+        # Calculate global indices for the big graph
+        # rows = i + b * N
+        # cols = j + b * N
+        rows = row_idx + b_idx * N
+        cols = col_idx + b_idx * N
+        
+        return stack([rows, cols], dim=0)
 
     def addGSO(self, S: Tensor) -> None:
         """
@@ -99,10 +84,8 @@ class PaperArchitecture(pl.LightningModule):
 
         this function refers to the original one in the repository
         """
-        if S.shape == torch.Size([1, 1]):
-            self.S = ones(
-                1, self.E, self.n_agents, self.n_agents, device=self.device
-            )
+        if S.shape == Size([1, 1]):
+            self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
             return
         if self.E == 1:
             assert len(S.shape) == 3
@@ -112,12 +95,9 @@ class PaperArchitecture(pl.LightningModule):
             assert S.shape[1] == self.E
             self.S = S
 
-        # Remove nan data
         self.S[isnan(self.S)] = 0
-        if self.config["GSO_mode"] == "dist_GSO_one":
-            self.S[self.S > 0] = 1
-        elif self.config["GSO_mode"] == "full_GSO":
-            self.S = ones_like(self.S)
+        self.S[self.S > 0] = 1
+        self.S = self.S.float()
         self.S = self.S.to(self.device)
 
     def _conv_block(
@@ -162,6 +142,7 @@ class PaperArchitecture(pl.LightningModule):
             self.activation,
         )
 
+    @DeprecationWarning
     def _graph_block(self, inp: int, output: int, k: int = 3) -> GSequential:
         """
         k graph convolutional layers with ReLU activation
@@ -185,12 +166,14 @@ class PaperArchitecture(pl.LightningModule):
         (B, N, C, W, H) = x.shape
         return x.view(B * N, C, W, H)
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, x_prev: Tensor | None = None) -> tuple[Tensor, Tensor]:
         """
         Forward pass through the network
         x: (B, N, C, W, H)
-        return: (B, N, n_actions)
+        x_prev: (B, N, T, 128) or None
+        return: (B, N, n_actions), (B, N, 128)
         """
+        (B, N, C, W, H) = x.shape
         # convolutional layers
         x = self._format_to_conv2d(x)
         x = self.flatten(
@@ -198,219 +181,74 @@ class PaperArchitecture(pl.LightningModule):
                 self.pool(self.conv3(self.drop(self.conv2(self.drop(self.conv1(x))))))
             )
         )  # output [B*N, 128]
+        
+        current_feature = x.view(B, N, -1) # [B, N, 128]
 
-        # graph convolutional layer with K-hop filter taps
-        edge_index = self._agents_to_edge_index(self.S)
-        x = self.cgnn(x, edge_index)  # [B*N, 128]
+        # time delayed graph
+        # if x_prev is None, we assume it's the first step, so we pad with zeros
+        # x_prev shape expected: [B, N, T, 128]
+        # we need T = nGraphFilterTaps - 1
+        
+        if x_prev is None:
+             x_prev = torch.zeros(B, N, self.nGraphFilterTaps - 1, 128, device=self.device)
 
-        # fully connected layers
+        y_time = [x] # x is [B*N, 128]
+        if len(self.S.shape) == 4:
+             S = self.S.squeeze(1) # [B, N, N]
+        else:
+             S = self.S
+             
+        if len(S.shape) == 4 and S.shape[1] == 1:
+             S = S.squeeze(1)
+        
+        for t in range(self.nGraphFilterTaps - 1):
+            prev_feat = x_prev[:, :, t, :]
+            
+            filtered = torch.matmul(S, prev_feat)
+            
+            filtered = filtered.view(B * N, 128)
+            y_time.append(filtered)
+        x_concatenated = cat(y_time, dim=1) # [B*N, 128 * K]
+        
+        x = x_concatenated
         x = self.activation(x)
         x = self.fc(x)  # [B*N, n_actions]
 
-        return x
+        return x, current_feature
 
-    def training_step(self, batch, batch_idx):
-        batch_input, batch_target, _, batch_GSO, _ = batch
-        (B, N, _, _, _) = batch_input.shape
-        batch_target = batch_target.reshape(B * N, self.n_actions)
-        self.addGSO(batch_GSO)
-        logits = self(batch_input)
-        targets = tmax(batch_target, 1)[1]
-        loss = self.loss(logits, targets)
-        self.train_acc(logits, targets)
-        self.log(
-            "train_acc", self.train_acc, prog_bar=True, on_step=True, on_epoch=True
-        )
-        self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        batch_input, batch_target, _, batch_GSO, _ = batch
-        (B, N, _, _, _) = batch_input.shape
-        batch_target = batch_target.reshape(B * N, self.n_actions)
-        self.addGSO(batch_GSO)
-        logits = self(batch_input)
-        targets = tmax(batch_target, 1)[1]
-        loss = self.loss(logits, targets)
-        self.val_acc(logits, targets)
-        self.log("val_acc", self.val_acc, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        return loss
-
-    def multiAgent_ActionPolicy(
-        self, input, load_target, makespanTarget, tensor_map, ID_dataset, mode
-    ):
-        self.robot.setup(
-            input, load_target, makespanTarget, tensor_map, ID_dataset, mode
-        )
-        maxstep = self.robot.getMaxstep()
-        allReachGoal = False
-        noReachGoalbyCollsionShielding = False
-        check_collisionFreeSol = False
-        check_CollisionHappenedinLoop = False
-        check_CollisionPredictedinLoop = False
-        findOptimalSolution = False
-        compare_makespan, compare_flowtime = self.robot.getOptimalityMetrics()
-        currentStep = 0
-
-        Case_start = time.time()
-        Time_cases_ForwardPass = []
-        for step in range(maxstep):
-            currentStep = step + 1
-            currentState = self.robot.getCurrentState()
-            currentStateGPU = currentState.to(self.device)
-
-            gso = self.robot.getGSO(step)
-            gsoGPU = gso.to(self.device)
-            self.addGSO(gsoGPU)
-            step_start = time.time()
-            actionVec_predict = self(currentStateGPU)  # B x N X 5
-            if self.config.batch_numAgent:
-                actionVec_predict = actionVec_predict.detach().cpu()
-            else:
-                actionVec_predict = [ts.detach().cpu() for ts in actionVec_predict]
-            time_ForwardPass = time.time() - step_start
-            Time_cases_ForwardPass.append(time_ForwardPass)
-            allReachGoal, check_moveCollision, check_predictCollision = self.robot.move(
-                actionVec_predict, currentStep
-            )
-
-            if check_moveCollision:
-                check_CollisionHappenedinLoop = True
-            if check_predictCollision:
-                check_CollisionPredictedinLoop = True
-            if allReachGoal:
-                break
-            elif currentStep >= (maxstep):
-                break
-
-        num_agents_reachgoal = self.robot.count_numAgents_ReachGoal()
-        store_GSO, store_communication_radius = self.robot.count_GSO_communcationRadius(
-            currentStep
-        )
-
-        if allReachGoal and not check_CollisionHappenedinLoop:
-            check_collisionFreeSol = True
-            noReachGoalbyCollsionShielding = False
-            findOptimalSolution, compare_makespan, compare_flowtime = (
-                self.robot.checkOptimality(True)
-            )
-            if self.config.log_anime and self.config.mode == "test":
-                self.robot.save_success_cases("success")
-
-        if currentStep >= (maxstep):
-            findOptimalSolution, compare_makespan, compare_flowtime = (
-                self.robot.checkOptimality(False)
-            )
-
-        if currentStep >= (maxstep) and not allReachGoal:
-            if self.config.log_anime and self.config.mode == "test":
-                self.robot.save_success_cases("failure")
-
-        if (
-            currentStep >= (maxstep)
-            and not allReachGoal
-            and check_CollisionPredictedinLoop
-            and not check_CollisionHappenedinLoop
-        ):
-            findOptimalSolution, compare_makespan, compare_flowtime = (
-                self.robot.checkOptimality(False)
-            )
-            # print("### Case - {} -Step{} exceed maxstep({})- ReachGoal: {} due to CollsionShielding \n".format(ID_dataset,currentStep,maxstep, allReachGoal))
-            noReachGoalbyCollsionShielding = True
-            if self.config.log_anime and self.config.mode == "test":
-                self.robot.save_success_cases("failure")
-        time_record = time.time() - Case_start
-
-        if self.config.mode == "test":
-            exp_status = (
-                "################## {} - End of loop ################## ".format(
-                    self.config.exp_name
-                )
-            )
-            case_status = "####### Case{} \t Computation time:{} \t Step{}/{}\t- AllReachGoal-{}\n".format(
-                ID_dataset, time_record, currentStep, maxstep, allReachGoal
-            )
-
-            logger.info("{} \n {}".format(exp_status, case_status))
-
-        return (
-            allReachGoal,
-            noReachGoalbyCollsionShielding,
-            findOptimalSolution,
-            check_collisionFreeSol,
-            check_CollisionPredictedinLoop,
-            compare_makespan,
-            compare_flowtime,
-            num_agents_reachgoal,
-            store_GSO,
-            store_communication_radius,
-            time_record,
-            Time_cases_ForwardPass,
-        )
-
-    def configure_optimizers(self):
-        optimizer = Adam(
-            self.parameters(),
-            lr=self.config.get("learning_rate", 1e-3),
-            weight_decay=self.config.get("weight_decay", 0),
-        )
-        scheduler = lr_scheduler.CosineAnnealingLR(
-            optimizer=optimizer,
-            T_max=self.config.get("max_epochs", 10),
-            eta_min=1e-6,
-        )
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": scheduler,
-        }
-
-    def test_single(self, mode, data_loader: DecentralPlannerDataLoader):
+    @staticmethod
+    def load_from_checkpoint(path: str) -> "Model":
         """
-        One cycle of model validation
-        :return:
+        Load a model from a PyTorch Lightning checkpoint file (.ckpt)
+
+        Args:
+            path: Path to the checkpoint file
+
+        Returns:
+            Model instance with loaded weights
         """
-        logger.info("test started")
-        self.eval()
-        if mode == "test":
-            dataloader = data_loader.test_loader
-            label = "test"
-        elif mode == "test_trainingSet":
-            dataloader = data_loader.test_trainingSet_loader
-            label = "test_training"
+        model = Model()
+        checkpoint = torch.load(path, map_location=model.device)
+
+        # PyTorch Lightning checkpoints have 'state_dict' key
+        if "state_dict" in checkpoint:
+            # Remove 'model.' prefix if present (common in Lightning checkpoints)
+            state_dict = checkpoint["state_dict"]
+            new_state_dict = {}
+            for key, value in state_dict.items():
+                new_key = key.replace("model.", "") if key.startswith("model.") else key
+                new_state_dict[new_key] = value
+            model.load_state_dict(new_state_dict)
         else:
-            dataloader = data_loader.valid_loader
-            label = "valid"
+            model.load_state_dict(checkpoint)
 
-        self.recorder.reset()
-        with torch.no_grad():
-            for input, target, makespan, _, tensor_map in tqdm(
-                dataloader, desc=f"Testing on {label} set", total=len(dataloader)
-            ):
-                inputGPU = input.to(self.device)
-                targetGPU = target.to(self.device)
-                log_result = self.multiAgent_ActionPolicy(
-                    inputGPU,
-                    targetGPU,
-                    makespan,
-                    tensor_map,
-                    self.recorder.count_validset,
-                    mode,
-                )
-                self.recorder.update(self.robot.getMaxstep(), log_result)
-                logger.info("current rateReachGoal: {}".format(self.recorder.rateReachGoal))
+        return model
 
-        logger.info(
-            "Accurracy(reachGoalnoCollision): {} \n  "
-            "DeteriorationRate(MakeSpan): {} \n  "
-            "DeteriorationRate(FlowTime): {} \n  "
-            "Rate(collisionPredictedinLoop): {} \n  "
-            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
-                round(self.recorder.rateReachGoal, 4),
-                round(self.recorder.avg_rate_deltaMP, 4),
-                round(self.recorder.avg_rate_deltaFT, 4),
-                round(self.recorder.rateCollisionPredictedinLoop, 4),
-                round(self.recorder.rateFailedReachGoalSH, 4),
-            )
-        )
-        return self.recorder.rateReachGoal
+    def save_to_checkpoint(self, path: str) -> None:
+        """
+        Save the model's state dictionary to a PyTorch Lightning checkpoint file (.ckpt)
+
+        Args:
+            path: Path to save the checkpoint file
+        """
+        torch.save(self.state_dict(), path)

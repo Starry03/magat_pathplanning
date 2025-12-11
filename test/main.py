@@ -12,7 +12,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from lightning import Trainer
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch import set_float32_matmul_precision
+from pytorch_lightning.profilers import AdvancedProfiler
+from torch import set_float32_matmul_precision, autograd
 
 
 from dataloader.Dataloader_dcplocal_notTF_onlineExpert import DecentralPlannerDataLoader
@@ -152,32 +153,47 @@ def add_flags(arg_parser: argparse.ArgumentParser) -> None:
 def main() -> None:
     arg_parser = argparse.ArgumentParser(description="")
     add_flags(arg_parser)
-
+    autograd.set_detect_anomaly(True)
     config = process_config(arg_parser.parse_args())
     model = PaperArchitecture(config)
     # model = PaperArchitecture.load_from_checkpoint(
-    #     "./tb_logs/2025-10-24 12:16:40.180986/version_0/checkpoints/epoch=0-step=8818.ckpt",
+    #     "./tb_logs/2025-10-27 02:26:28.995596/version_0/checkpoints/epoch=56-step=502626.ckpt",
     #     config=config,
     # )
     trainer = Trainer(
         accelerator="gpu",
-        max_epochs=config.get("max_epochs", 10),
+        # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
+        max_epochs=150,
+        precision="16-mixed",
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
         enable_checkpointing=True,
         enable_model_summary=True,
         enable_progress_bar=True,
+        benchmark=True,
+        profiler=AdvancedProfiler(),
     )
     data_loader = DecentralPlannerDataLoader(config=config)
     if config.get("mode") == "test":
-        model.test_single(config.get("mode"), data_loader)
+        res = model.test_single(config.get("mode"), data_loader)
+        print("RESULT", res)
         return
+    model.attach_eval_loaders(
+        valid_loader=data_loader.valid_loader,
+        test_loader=getattr(data_loader, "test_loader", None),
+        training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
+    )
     trainer.fit(
         model,
         train_dataloaders=data_loader.train_loader,
-        val_dataloaders=data_loader.valid_loader,
+        val_dataloaders=data_loader.validStep_loader,
     )
     config["mode"] = "test"
     data_loader = DecentralPlannerDataLoader(config=config)
+    model.attach_eval_loaders(
+        valid_loader=data_loader.valid_loader,
+        test_loader=getattr(data_loader, "test_loader", None),
+        training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
+    )
     model.test_single(config.get("mode"), data_loader)
 
 

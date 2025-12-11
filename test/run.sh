@@ -7,7 +7,7 @@ echo "Current time: $now"
 ## test
 
 python ./test/main.py /home/starry/Documents/uni_project/magat_pathplanning/configs/test/test_train_pl.json \
-    --mode test \
+    --mode train \
     --map_density 1 --map_w 20 --num_agents 10 --nGraphFilterTaps 3   \
     --trained_num_agents 10 \
     --commR 5 \
