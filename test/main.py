@@ -17,7 +17,7 @@ from torch import set_float32_matmul_precision, autograd
 
 
 from dataloader.Dataloader_dcplocal_notTF_onlineExpert import DecentralPlannerDataLoader
-from test.model import PaperArchitecture
+from test.model import Model
 from utils.config import process_config
 
 
@@ -155,13 +155,13 @@ def main() -> None:
     add_flags(arg_parser)
     autograd.set_detect_anomaly(True)
     config = process_config(arg_parser.parse_args())
-    model = PaperArchitecture(config)
-    # model = PaperArchitecture.load_from_checkpoint(
+    model = Model(config)
+    # model = Model.load_from_checkpoint(
     #     "./tb_logs/2025-10-27 02:26:28.995596/version_0/checkpoints/epoch=56-step=502626.ckpt",
     #     config=config,
     # )
     trainer = Trainer(
-        accelerator="gpu",
+        accelerator="auto",
         # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
         max_epochs=150,
         precision="16-mixed",
@@ -174,14 +174,15 @@ def main() -> None:
     )
     data_loader = DecentralPlannerDataLoader(config=config)
     if config.get("mode") == "test":
+        model.to(model.dev)
         res = model.test_single(config.get("mode"), data_loader)
         print("RESULT", res)
         return
-    model.attach_eval_loaders(
-        valid_loader=data_loader.valid_loader,
-        test_loader=getattr(data_loader, "test_loader", None),
-        training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
-    )
+    # model.attach_eval_loaders(
+    #     valid_loader=data_loader.valid_loader,
+    #     test_loader=getattr(data_loader, "test_loader", None),
+    #     training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
+    # )
     trainer.fit(
         model,
         train_dataloaders=data_loader.train_loader,

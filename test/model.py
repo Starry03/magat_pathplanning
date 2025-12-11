@@ -12,14 +12,24 @@ from torch.nn import (
     Dropout,
     AdaptiveAvgPool2d,
 )
+from torch.optim import Adam
 from torch_geometric.nn import GCNConv, ChebConv, Sequential as GSequential
+from lightning.pytorch import LightningModule
+from torch.optim import lr_scheduler
+from torch.nn import CrossEntropyLoss
+from torchmetrics import Accuracy
+from utils.new_simulator import multiRobotSimNew
+from utils.metrics import MonitoringMultiAgentPerformance
+from dataloader.IL_DataLoader import IL_DataLoader
+from logger import logger
+from tqdm import tqdm
+import time
 
-
-class Model(Module):
-    def __init__(self) -> None:
+class Model(LightningModule):
+    def __init__(self, config) -> None:
         super().__init__()
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-
+        self.dev = "cuda" if torch.cuda.is_available() else "cpu"
+        self.config = config
         self.n_agents = 10
         self.FOV = 4
         self.wl, self.hl = self.FOV + 2, self.FOV + 2
@@ -27,6 +37,13 @@ class Model(Module):
         self.n_actions: int = 5
         self.E = 1
         self.nGraphFilterTaps = 3
+
+        self.loss = CrossEntropyLoss()
+        self.train_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
+        self.val_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
+        self.robot = multiRobotSimNew(config)
+        self.recorder = MonitoringMultiAgentPerformance(self.config)
+
 
         # layers
         self.pool = AdaptiveAvgPool2d((1, 1))
@@ -50,7 +67,7 @@ class Model(Module):
         # )
         # self.cgnn = self._graph_block_paper()
         self.fc = Linear(128 * self.nGraphFilterTaps, self.n_actions)
-        self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
+        self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.dev)
 
     def _agents_to_edge_index(self, S: Tensor):
         """
@@ -85,7 +102,7 @@ class Model(Module):
         this function refers to the original one in the repository
         """
         if S.shape == Size([1, 1]):
-            self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.device)
+            self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.dev)
             return
         if self.E == 1:
             assert len(S.shape) == 3
@@ -98,7 +115,7 @@ class Model(Module):
         self.S[isnan(self.S)] = 0
         self.S[self.S > 0] = 1
         self.S = self.S.float()
-        self.S = self.S.to(self.device)
+        self.S = self.S.to(self.dev)
 
     def _conv_block(
         self,
@@ -190,7 +207,7 @@ class Model(Module):
         # we need T = nGraphFilterTaps - 1
         
         if x_prev is None:
-             x_prev = torch.zeros(B, N, self.nGraphFilterTaps - 1, 128, device=self.device)
+             x_prev = torch.zeros(B, N, self.nGraphFilterTaps - 1, 128, device=self.dev)
 
         y_time = [x] # x is [B*N, 128]
         if len(self.S.shape) == 4:
@@ -228,7 +245,7 @@ class Model(Module):
             Model instance with loaded weights
         """
         model = Model()
-        checkpoint = torch.load(path, map_location=model.device)
+        checkpoint = torch.load(path, map_location=model.dev)
 
         # PyTorch Lightning checkpoints have 'state_dict' key
         if "state_dict" in checkpoint:
@@ -252,3 +269,247 @@ class Model(Module):
             path: Path to save the checkpoint file
         """
         torch.save(self.state_dict(), path)
+    
+    def training_step(self, batch, batch_idx):
+        batch_input, batch_target, _, batch_GSO, _ = batch
+        (B, N, _, _, _) = batch_input.shape
+        batch_target = batch_target.reshape(B * N, self.n_actions)
+        self.addGSO(batch_GSO)
+        logits, _ = self(batch_input)
+        targets = torch.max(batch_target, 1)[1]
+        loss = self.loss(logits, targets)
+        self.train_acc(logits, targets)
+        self.log(
+            "train_acc", self.train_acc, prog_bar=True, on_step=True, on_epoch=True
+        )
+        self.log("train_loss", loss, prog_bar=True, on_step=True, on_epoch=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        batch_input, batch_target, _, batch_GSO, _ = batch
+        (B, N, _, _, _) = batch_input.shape
+        batch_target = batch_target.reshape(B * N, self.n_actions)
+        self.addGSO(batch_GSO)
+        logits, _ = self(batch_input)
+        targets = torch.max(batch_target, 1)[1]
+        loss = self.loss(logits, targets)
+        self.val_acc(logits, targets)
+        self.log("val_acc", self.val_acc, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
+        return loss
+
+    def multiAgent_ActionPolicy(
+        self, input, load_target, makespanTarget, tensor_map, ID_dataset, mode
+    ):
+        self.robot.setup(
+            input, load_target, makespanTarget, tensor_map, ID_dataset, mode
+        )
+        maxstep = self.robot.getMaxstep()
+        allReachGoal = False
+        noReachGoalbyCollsionShielding = False
+        check_collisionFreeSol = False
+        check_CollisionHappenedinLoop = False
+        check_CollisionPredictedinLoop = False
+        findOptimalSolution = False
+        compare_makespan, compare_flowtime = self.robot.getOptimalityMetrics()
+        currentStep = 0
+
+        Case_start = time.time()
+        Time_cases_ForwardPass = []
+        for step in range(maxstep):
+            currentStep = step + 1
+            currentState = self.robot.getCurrentState()
+            currentStateGPU = currentState.to(self.config.device)
+
+            gso = self.robot.getGSO(step)
+            gsoGPU = gso.to(self.config.device)
+            self.addGSO(gsoGPU)
+            step_start = time.time()
+            actionVec_predict, _ = self(currentStateGPU)  # B x N X 5
+            if self.config.batch_numAgent:
+                actionVec_predict = actionVec_predict.detach().cpu()
+            else:
+                actionVec_predict = [ts.detach().cpu() for ts in actionVec_predict]
+            time_ForwardPass = time.time() - step_start
+            Time_cases_ForwardPass.append(time_ForwardPass)
+            allReachGoal, check_moveCollision, check_predictCollision = self.robot.move(
+                actionVec_predict, currentStep
+            )
+
+            if check_moveCollision:
+                check_CollisionHappenedinLoop = True
+            if check_predictCollision:
+                check_CollisionPredictedinLoop = True
+            if allReachGoal:
+                break
+            elif currentStep >= (maxstep):
+                break
+
+        num_agents_reachgoal = self.robot.count_numAgents_ReachGoal()
+        store_GSO, store_communication_radius = self.robot.count_GSO_communcationRadius(
+            currentStep
+        )
+
+        if allReachGoal and not check_CollisionHappenedinLoop:
+            check_collisionFreeSol = True
+            noReachGoalbyCollsionShielding = False
+            findOptimalSolution, compare_makespan, compare_flowtime = (
+                self.robot.checkOptimality(True)
+            )
+            if self.config.log_anime and self.config.mode == "test":
+                self.robot.save_success_cases("success")
+
+        if currentStep >= (maxstep):
+            findOptimalSolution, compare_makespan, compare_flowtime = (
+                self.robot.checkOptimality(False)
+            )
+
+        if currentStep >= (maxstep) and not allReachGoal:
+            if self.config.log_anime and self.config.mode == "test":
+                self.robot.save_success_cases("failure")
+
+        if (
+            currentStep >= (maxstep)
+            and not allReachGoal
+            and check_CollisionPredictedinLoop
+            and not check_CollisionHappenedinLoop
+        ):
+            findOptimalSolution, compare_makespan, compare_flowtime = (
+                self.robot.checkOptimality(False)
+            )
+            # print("### Case - {} -Step{} exceed maxstep({})- ReachGoal: {} due to CollsionShielding \n".format(ID_dataset,currentStep,maxstep, allReachGoal))
+            noReachGoalbyCollsionShielding = True
+            if self.config.log_anime and self.config.mode == "test":
+                self.robot.save_success_cases("failure")
+        time_record = time.time() - Case_start
+
+        if self.config.mode == "test":
+            exp_status = (
+                "################## {} - End of loop ################## ".format(
+                    self.config.exp_name
+                )
+            )
+            case_status = "####### Case{} \t Computation time:{} \t Step{}/{}\t- AllReachGoal-{}\n".format(
+                ID_dataset, time_record, currentStep, maxstep, allReachGoal
+            )
+
+            logger.info("{} \n {}".format(exp_status, case_status))
+
+        return (
+            allReachGoal,
+            noReachGoalbyCollsionShielding,
+            findOptimalSolution,
+            check_collisionFreeSol,
+            check_CollisionPredictedinLoop,
+            compare_makespan,
+            compare_flowtime,
+            num_agents_reachgoal,
+            store_GSO,
+            store_communication_radius,
+            time_record,
+            Time_cases_ForwardPass,
+        )
+
+    def test_step(self, batch, batch_idx):
+        """
+
+        single dim batch
+        """
+        logger.info("test started")
+        self.recorder.reset()
+        (
+            batch_input,
+            batch_target,
+            batch_makespanTarget,
+            batch_tensor_map,
+            batch_ID_dataset,
+        ) = batch
+        log_result = self.mutliAgent_ActionPolicy(
+            batch_input,
+            batch_target,
+            batch_makespanTarget,
+            batch_tensor_map,
+            self.recorder.count_validset,
+            mode="test",
+        )
+        self.recorder.update(self.robot.getMaxstep(), log_result)
+        logger.info(
+            "Accurracy(reachGoalnoCollision): {} \n  "
+            "DeteriorationRate(MakeSpan): {} \n  "
+            "DeteriorationRate(FlowTime): {} \n  "
+            "Rate(collisionPredictedinLoop): {} \n  "
+            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
+                round(self.recorder.rateReachGoal, 4),
+                round(self.recorder.avg_rate_deltaMP, 4),
+                round(self.recorder.avg_rate_deltaFT, 4),
+                round(self.recorder.rateCollisionPredictedinLoop, 4),
+                round(self.recorder.rateFailedReachGoalSH, 4),
+            )
+        )
+        return self.recorder.rateReachGoal
+
+    def configure_optimizers(self):
+        optimizer = Adam(
+            self.parameters(),
+            lr=self.config.get("learning_rate", 1e-3),
+            weight_decay=self.config.get("weight_decay", 0),
+        )
+        scheduler = lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=self.config.get("max_epochs", 10),
+            eta_min=1e-6,
+        )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": scheduler,
+        }
+
+    def test_single(self, mode, data_loader: IL_DataLoader):
+        """
+        One cycle of model validation
+        :return:
+        """
+        logger.info("test started")
+        self.eval()
+        if mode == "test":
+            dataloader = data_loader.test_loader
+            label = "test"
+        elif mode == "test_trainingSet":
+            dataloader = data_loader.test_trainingSet_loader
+            label = "test_training"
+        else:
+            dataloader = data_loader.valid_loader
+            label = "valid"
+
+        self.recorder.reset()
+        with torch.no_grad():
+            for input, target, makespan, _, tensor_map in tqdm(
+                dataloader, desc=f"Testing on {label} set", total=len(dataloader)
+            ):
+                inputGPU = input.to(self.dev)
+                targetGPU = target.to(self.dev)
+                log_result = self.multiAgent_ActionPolicy(
+                    inputGPU,
+                    targetGPU,
+                    makespan,
+                    tensor_map,
+                    self.recorder.count_validset,
+                    mode,
+                )
+                self.recorder.update(self.robot.getMaxstep(), log_result)
+                logger.info("current rateReachGoal: {}".format(self.recorder.rateReachGoal))
+
+        logger.info(
+            "Accurracy(reachGoalnoCollision): {} \n  "
+            "DeteriorationRate(MakeSpan): {} \n  "
+            "DeteriorationRate(FlowTime): {} \n  "
+            "Rate(collisionPredictedinLoop): {} \n  "
+            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
+                round(self.recorder.rateReachGoal, 4),
+                round(self.recorder.avg_rate_deltaMP, 4),
+                round(self.recorder.avg_rate_deltaFT, 4),
+                round(self.recorder.rateCollisionPredictedinLoop, 4),
+                round(self.recorder.rateFailedReachGoalSH, 4),
+            )
+        )
+        return self.recorder.rateReachGoal
