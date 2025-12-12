@@ -24,12 +24,14 @@ from dataloader.IL_DataLoader import IL_DataLoader
 from logger import logger
 from tqdm import tqdm
 import time
+from test.renderer import Renderer
 
 class Model(LightningModule):
     def __init__(self, config) -> None:
         super().__init__()
         self.dev = "cuda" if torch.cuda.is_available() else "cpu"
         self.config = config
+        self.config.device = self.dev
         self.n_agents = 10
         self.FOV = 4
         self.wl, self.hl = self.FOV + 2, self.FOV + 2
@@ -42,6 +44,7 @@ class Model(LightningModule):
         self.train_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.n_actions)
         self.robot = multiRobotSimNew(config)
+        self.renderer = Renderer(self.robot)
         self.recorder = MonitoringMultiAgentPerformance(self.config)
 
 
@@ -313,6 +316,9 @@ class Model(LightningModule):
         findOptimalSolution = False
         compare_makespan, compare_flowtime = self.robot.getOptimalityMetrics()
         currentStep = 0
+        
+        # Initialize Renderer
+        logger.debug("New map")
 
         Case_start = time.time()
         Time_cases_ForwardPass = []
@@ -335,6 +341,11 @@ class Model(LightningModule):
             allReachGoal, check_moveCollision, check_predictCollision = self.robot.move(
                 actionVec_predict, currentStep
             )
+            
+            # Render step
+            if self.renderer:                 
+                self.renderer.update_stats(actionVec_predict, [check_moveCollision]) 
+                self.renderer.render()
 
             if check_moveCollision:
                 check_CollisionHappenedinLoop = True

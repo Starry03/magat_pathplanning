@@ -14,4 +14,10 @@ handler.setFormatter(colorlog.ColoredFormatter(
 ))
 
 logger = logging.getLogger('PaperAgentLogger')
+logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
+
+# Add FileHandler
+file_handler = logging.FileHandler('test.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(file_handler)

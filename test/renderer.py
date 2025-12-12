@@ -1,5 +1,6 @@
 import os
 import pygame
+import torch
 from logger import logger
 
 # from env.environment import Environment
@@ -7,11 +8,14 @@ from logger import logger
 class Renderer:
     def __init__(self, env):
         self.env = env
+
         self.fps = 240
         
         # rendering
         pygame.init()
+
         self.window = pygame.display.set_mode((800, 600))
+
         pygame.display.set_caption("Environment Visualization")
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 18)
@@ -46,14 +50,32 @@ class Renderer:
 
         self.slider_rect = pygame.Rect(610, 100, 180, 10)  # Initial, updated in draw
         self.dragging_slider = False
+        self.slider_rect = pygame.Rect(610, 100, 180, 10)  # Initial, updated in draw
+        self.dragging_slider = False
 
     def update_stats(self, action, collisions):
         self.last_actions = action
         self.step_counter += 1
         self.last_step_time = pygame.time.get_ticks()
+        
         # collisions is [B, N], check if any agent in first batch collided
-        if collisions[0].sum() > 0:
-            self.collision_occurred = True
+        # Handle both tensor and numpy array for collisions
+        if hasattr(collisions, 'shape'): # Numpy or Tensor
+             if len(collisions.shape) > 1:
+                # If batch dim exists, take first batch
+                col_data = collisions[0]
+             else:
+                col_data = collisions
+                
+             if isinstance(col_data, torch.Tensor):
+                 if col_data.sum().item() > 0:
+                     self.collision_occurred = True
+             else: # Numpy
+                 if col_data.sum() > 0:
+                     self.collision_occurred = True
+        elif isinstance(collisions, (list, tuple)): # List of bools
+             if any(collisions):
+                 self.collision_occurred = True
 
         # Slider state
         self.dragging_slider = False
@@ -68,17 +90,24 @@ class Renderer:
         """
         render 1st element in batch
         """
-        if self.env.state is None:
-            return
+        # Support for multiRobotSimNew which doesn't have .state
+        has_state_obj = hasattr(self.env, 'state') and self.env.state is not None
+        
+        if not has_state_obj and not hasattr(self.env, 'channel_map'):
+             return
 
-        self.env.state.sanity_check()
+
+        if has_state_obj:
+             self.env.state.sanity_check()
 
         if self.window is None:
             return
 
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                # pygame.quit() # Do not quit the whole app, just close window? Or maybe just ignore
+                # For safety in training loop, we might just want to set a flag or ignore
                 return
             elif event.type == pygame.KEYDOWN:
                 if (
@@ -112,28 +141,41 @@ class Renderer:
 
         self.window.fill((255, 255, 255))
 
+        # Get map dimensions
+        if has_state_obj:
+            map_h, map_w = self.env.map_size
+        else:
+            map_h, map_w = self.env.size_map
+
         # Calculate dimensions
         map_area_width = 600
         dashboard_width = 200
-        cell_w = map_area_width // self.env.map_size[1]
-        cell_h = 600 // self.env.map_size[0]
+        cell_w = map_area_width // map_w
+        cell_h = 600 // map_h
         icon_size = min(cell_w, cell_h) - 4
 
         # Draw grid (minimal)
-        for i in range(self.env.map_size[0] + 1):
+        for i in range(map_h + 1):
             pygame.draw.line(
                 self.window, (230, 230, 230), (0, i * cell_h), (600, i * cell_h), 1
             )
-        for j in range(self.env.map_size[1] + 1):
+        for j in range(map_w + 1):
             pygame.draw.line(
                 self.window, (230, 230, 230), (j * cell_w, 0), (j * cell_w, 600), 1
             )
 
-        map_batch = self.env.state.map[0].detach().to("cpu")  # [H, W]
+        # Get Map
+        if has_state_obj:
+            map_batch = self.env.state.map[0].detach().to("cpu")  # [H, W]
+        else:
+            map_batch = self.env.channel_map.detach().cpu()
+            if len(map_batch.shape) == 3: # Handle case if extra dim
+                 map_batch = map_batch[0]
+            
         obstacle_count = 0
 
-        for i in range(self.env.map_size[0]):
-            for j in range(self.env.map_size[1]):
+        for i in range(map_h):
+            for j in range(map_w):
                 if map_batch[i, j].item() == 1:  # Obstacle
                     obstacle_count += 1
                     x = j * cell_w
@@ -152,11 +194,21 @@ class Renderer:
                             (50, 50, 50),
                             pygame.Rect(x + 2, y + 2, icon_size, icon_size),
                         )
-        # Draw goals with icons
-        goals_batch = self.env.state.goals[0].detach().to("cpu")  # First batch
-        for idx, goal in enumerate(goals_batch):
-            x = int(goal[1].item() * cell_w)
-            y = int(goal[0].item() * cell_h)
+        
+        # Get Goals
+        if has_state_obj:
+             goals_batch = self.env.state.goals[0].detach().to("cpu")  # First batch
+        else:
+             goals_batch = self.env.goal_positions # Numpy array [N, 2]
+             
+        for idx in range(len(goals_batch)):
+            goal = goals_batch[idx]
+            # Handle both tensor/numpy indexing
+            row = goal[0].item() if isinstance(goal, torch.Tensor) else goal[0]
+            col = goal[1].item() if isinstance(goal, torch.Tensor) else goal[1]
+            
+            x = int(col * cell_w)
+            y = int(row * cell_h)
             if self.goal_icon is not None:
                 scaled_icon = pygame.transform.scale(
                     self.goal_icon, (icon_size, icon_size)
@@ -171,28 +223,48 @@ class Renderer:
                     pygame.Rect(x + 2, y + 2, icon_size, icon_size),
                 )
 
-        # Draw agents with icons
-        positions_batch = (
-            self.env.state.input_state.reshape(self.env.state.B, self.env.state.N, 2)[0]
-            .detach()
-            .to("cpu")
-        )
+        # Get Agent Positions
+        if has_state_obj:
+            positions_batch = (
+                self.env.state.input_state.reshape(self.env.state.B, self.env.state.N, 2)[0]
+                .detach()
+                .to("cpu")
+            )
+        else:
+            positions_batch = self.env.current_positions # Numpy array [N, 2]
 
         # Draw lines connecting agents to their goals
-        for pos, goal in zip(positions_batch, goals_batch):
+        # Ensure length match
+        num_agents = min(len(positions_batch), len(goals_batch))
+        
+        for k in range(num_agents):
+            pos = positions_batch[k]
+            goal = goals_batch[k]
+            
+            pos_r = pos[0].item() if isinstance(pos, torch.Tensor) else pos[0]
+            pos_c = pos[1].item() if isinstance(pos, torch.Tensor) else pos[1]
+            
+            goal_r = goal[0].item() if isinstance(goal, torch.Tensor) else goal[0]
+            goal_c = goal[1].item() if isinstance(goal, torch.Tensor) else goal[1]
+            
             start = (
-                int(pos[1].item() * cell_w + cell_w // 2),
-                int(pos[0].item() * cell_h + cell_h // 2),
+                int(pos_c * cell_w + cell_w // 2),
+                int(pos_r * cell_h + cell_h // 2),
             )
             end = (
-                int(goal[1].item() * cell_w + cell_w // 2),
-                int(goal[0].item() * cell_h + cell_h // 2),
+                int(goal_c * cell_w + cell_w // 2),
+                int(goal_r * cell_h + cell_h // 2),
             )
             pygame.draw.line(self.window, (0, 0, 0), start, end, 1)
 
-        for idx, pos in enumerate(positions_batch):
-            x = int(pos[1].item() * cell_w)
-            y = int(pos[0].item() * cell_h)
+        # Draw agents
+        for idx in range(num_agents):
+            pos = positions_batch[idx]
+            pos_r = pos[0].item() if isinstance(pos, torch.Tensor) else pos[0]
+            pos_c = pos[1].item() if isinstance(pos, torch.Tensor) else pos[1]
+            
+            x = int(pos_c * cell_w)
+            y = int(pos_r * cell_h)
 
             if self.agent_icon is not None:
                 scaled_icon = pygame.transform.scale(
@@ -211,7 +283,14 @@ class Renderer:
                 )
 
         # Draw dashboard
-        self._draw_dashboard(map_area_width, dashboard_width)
+        if has_state_obj:
+            n_agents = self.env.state.N
+            batch_size = self.env.state.B
+        else:
+            n_agents = self.env.config.num_agents
+            batch_size = 1
+            
+        self._draw_dashboard(map_area_width, dashboard_width, n_agents, batch_size)
 
         pygame.display.flip()
         self.clock.tick(self.fps)
@@ -235,7 +314,7 @@ class Renderer:
 
         self.fps = int(fps)
 
-    def _draw_dashboard(self, map_area_width, dashboard_width):
+    def _draw_dashboard(self, map_area_width, dashboard_width, n_agents, batch_size):
         """Draw dashboard with agent actions and status"""
         dashboard_x = map_area_width + 10
         y_offset = 10
@@ -325,14 +404,35 @@ class Renderer:
 
         if self.last_actions is not None:
             # Get actions for first batch
-            actions_batch = self.last_actions[
-                : self.env.state.B
-            ]  # First N actions (first batch)
-
+            # Handle list of tensors, single tensor, or numpy
+            actions_batch = self.last_actions
+            
+            if isinstance(actions_batch, list):
+                 actions_batch = torch.stack(actions_batch) if len(actions_batch) > 0 and isinstance(actions_batch[0], torch.Tensor) else actions_batch
+                 
+            if hasattr(actions_batch, "shape"):
+                if len(actions_batch.shape) > 1 and actions_batch.shape[0] == batch_size:
+                     actions_batch = actions_batch[0] # Take first from batch
+                elif len(actions_batch.shape) == 1 and batch_size > 1:
+                     pass # Assuming it's already flattened or single batch?
+                     
+            # Now we expect actions_batch to be 1D array of actions for the N agents
+            
+            # Helper to convert logits/probs to indices if needed
+            if hasattr(actions_batch, "shape") and len(actions_batch.shape) >= 2 and actions_batch.shape[-1] == 5:
+                 if hasattr(actions_batch, "argmax"):
+                     actions_batch = actions_batch.argmax(dim=-1)
+                 else: # numpy
+                     actions_batch = actions_batch.argmax(axis=-1)
+            
             # Count actions
             action_counts = {}
             for action_idx in range(5):
-                count = (actions_batch == action_idx).sum().item()
+                if hasattr(actions_batch, "cpu"):
+                     count = (actions_batch == action_idx).sum().item()
+                else: # Numpy
+                     count = (actions_batch == action_idx).sum()
+                     
                 if count > 0:
                     action_counts[action_idx] = count
 
@@ -346,9 +446,15 @@ class Renderer:
             y_offset += 10
 
             # Display individual agent actions (limited to avoid overflow)
-            max_agents_display = min(15, self.env.state.N)
+            max_agents_display = min(15, n_agents)
             for i in range(max_agents_display):
-                action_idx = actions_batch[i].item()
+                if hasattr(actions_batch, "cpu"):
+                    action_idx = actions_batch[i].item()
+                else: 
+                     action_idx = actions_batch[i]
+                     
+                action_idx = int(action_idx)
+                     
                 agent_text = f"A{i}: {self.action_names[action_idx]}"
 
                 # Color code based on action
@@ -364,9 +470,9 @@ class Renderer:
                 if y_offset > 580:  # Stop if reaching bottom
                     break
 
-            if self.env.state.N > max_agents_display:
+            if n_agents > max_agents_display:
                 more_text = self.font_small.render(
-                    f"... +{self.env.state.N - max_agents_display} more",
+                    f"... +{n_agents - max_agents_display} more",
                     True,
                     (100, 100, 100),
                 )

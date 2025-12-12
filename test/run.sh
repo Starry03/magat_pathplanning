@@ -1,3 +1,5 @@
+#!/bin/bash
+export DISPLAY=:1
 source .venv/bin/activate
 
 # get current time
@@ -15,5 +17,6 @@ python ./test/main.py /home/starry/Documents/uni_project/magat_pathplanning/conf
     --update_valid_set 1000 \
     --update_valid_set_epoch 70 --threshold_SuccessRate 90 --default_actionSelect \
     --guidance Project_G \
-    --test_num_processes 0 \
+    --test_num_processes 4 \
     --tb_ExpName PaperArchitecture_TestRun_${now} \
+    --render

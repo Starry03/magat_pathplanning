@@ -64,6 +64,7 @@ def add_flags(arg_parser: argparse.ArgumentParser) -> None:
 
     arg_parser.add_argument("--Use_infoMode", type=int, default=0)
     arg_parser.add_argument("--log_anime", action="store_true", default=False)
+    arg_parser.add_argument("--render", action="store_true", default=False)
     arg_parser.add_argument("--rate_maxstep", type=int, default=2)
 
     arg_parser.add_argument("--vary_ComR_FOV", action="store_true", default=False)
@@ -163,7 +164,7 @@ def main() -> None:
     trainer = Trainer(
         accelerator="auto",
         # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
-        max_epochs=150,
+        max_epochs=1,
         precision="16-mixed",
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
         enable_checkpointing=True,
@@ -190,11 +191,12 @@ def main() -> None:
     )
     config["mode"] = "test"
     data_loader = DecentralPlannerDataLoader(config=config)
-    model.attach_eval_loaders(
-        valid_loader=data_loader.valid_loader,
-        test_loader=getattr(data_loader, "test_loader", None),
-        training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
-    )
+    model.to(model.dev)
+    # model.attach_eval_loaders(
+    #     valid_loader=data_loader.valid_loader,
+    #     test_loader=getattr(data_loader, "test_loader", None),
+    #     training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
+    # )
     model.test_single(config.get("mode"), data_loader)
 
 

@@ -1,0 +1,228 @@
+2025-12-12 01:56:58,145 - PaperAgentLogger - INFO - test started
+2025-12-12 01:56:58,325 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:00,343 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501010 - End of loop ##################  
+ ####### Case0 	 Computation time:2.0166709423065186 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 01:57:00,344 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:00,414 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:01,698 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501010 - End of loop ##################  
+ ####### Case1 	 Computation time:1.2825682163238525 	 Step40/40	- AllReachGoal-False
+
+2025-12-12 01:57:01,698 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:01,773 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:04,127 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501010 - End of loop ##################  
+ ####### Case2 	 Computation time:2.352924346923828 	 Step74/74	- AllReachGoal-False
+
+2025-12-12 01:57:04,128 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:04,198 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:05,729 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501010 - End of loop ##################  
+ ####### Case3 	 Computation time:1.5300941467285156 	 Step48/48	- AllReachGoal-False
+
+2025-12-12 01:57:05,729 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:05,803 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:07,720 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501010 - End of loop ##################  
+ ####### Case4 	 Computation time:1.9165432453155518 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 01:57:07,721 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:07,792 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:09,424 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501010 - End of loop ##################  
+ ####### Case5 	 Computation time:1.6315104961395264 	 Step50/50	- AllReachGoal-False
+
+2025-12-12 01:57:09,425 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:09,498 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:51,299 - PaperAgentLogger - INFO - test started
+2025-12-12 01:57:51,481 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:53,491 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case0 	 Computation time:2.0100483894348145 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 01:57:53,492 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:53,563 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:54,845 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case1 	 Computation time:1.2816851139068604 	 Step40/40	- AllReachGoal-False
+
+2025-12-12 01:57:54,846 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:55,057 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:57,420 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case2 	 Computation time:2.3616998195648193 	 Step74/74	- AllReachGoal-False
+
+2025-12-12 01:57:57,420 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:57,497 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:57:59,039 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case3 	 Computation time:1.5417709350585938 	 Step48/48	- AllReachGoal-False
+
+2025-12-12 01:57:59,040 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:57:59,112 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:58:01,051 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case4 	 Computation time:1.9381217956542969 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 01:58:01,052 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:58:01,123 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:58:02,732 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case5 	 Computation time:1.6079063415527344 	 Step50/50	- AllReachGoal-False
+
+2025-12-12 01:58:02,732 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:58:02,805 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:58:04,722 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case6 	 Computation time:1.9157938957214355 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 01:58:04,722 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 01:58:04,796 - PaperAgentLogger - DEBUG - Renderer obj created
+2025-12-12 01:58:06,529 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501064 - End of loop ##################  
+ ####### Case7 	 Computation time:1.732748031616211 	 Step54/54	- AllReachGoal-False
+
+2025-12-12 01:58:06,530 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:30,597 - PaperAgentLogger - INFO - test started
+2025-12-12 02:01:30,613 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:32,455 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case0 	 Computation time:1.8411226272583008 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:01:32,456 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:32,467 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:33,657 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case1 	 Computation time:1.188786506652832 	 Step40/40	- AllReachGoal-False
+
+2025-12-12 02:01:33,658 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:33,674 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:35,850 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case2 	 Computation time:2.1756420135498047 	 Step74/74	- AllReachGoal-False
+
+2025-12-12 02:01:35,851 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:35,863 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:37,278 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case3 	 Computation time:1.4141151905059814 	 Step48/48	- AllReachGoal-False
+
+2025-12-12 02:01:37,279 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:37,293 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:39,052 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case4 	 Computation time:1.7587189674377441 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:01:39,053 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:39,066 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:40,541 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case5 	 Computation time:1.47523832321167 	 Step50/50	- AllReachGoal-False
+
+2025-12-12 02:01:40,542 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:40,556 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:01:42,326 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501283 - End of loop ##################  
+ ####### Case6 	 Computation time:1.7688448429107666 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:01:42,326 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:01:42,340 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:03:49,776 - PaperAgentLogger - DEBUG - Renderer initializing...
+2025-12-12 02:03:49,881 - PaperAgentLogger - DEBUG - Pygame initialized
+2025-12-12 02:03:50,057 - PaperAgentLogger - DEBUG - Window set mode: <Surface(800x600x32 SW)>
+2025-12-12 02:03:50,069 - PaperAgentLogger - DEBUG - Renderer initialized successfully
+2025-12-12 02:03:57,166 - PaperAgentLogger - INFO - test started
+2025-12-12 02:03:57,182 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:04:58,693 - PaperAgentLogger - DEBUG - Renderer initializing...
+2025-12-12 02:04:58,795 - PaperAgentLogger - DEBUG - Pygame initialized
+2025-12-12 02:04:58,833 - PaperAgentLogger - DEBUG - Window set mode: <Surface(800x600x32 SW)>
+2025-12-12 02:04:58,845 - PaperAgentLogger - DEBUG - Renderer initialized successfully
+2025-12-12 02:05:05,985 - PaperAgentLogger - INFO - test started
+2025-12-12 02:05:06,001 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:05:06,100 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,135 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,166 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,197 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,228 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,260 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,290 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,322 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:06,353 - PaperAgentLogger - DEBUG - render() called
+2025-12-12 02:05:53,068 - PaperAgentLogger - DEBUG - Renderer initializing...
+2025-12-12 02:05:53,172 - PaperAgentLogger - DEBUG - Pygame initialized
+2025-12-12 02:05:53,173 - PaperAgentLogger - DEBUG - DISPLAY env: None
+2025-12-12 02:05:53,173 - PaperAgentLogger - DEBUG - SDL Driver: offscreen
+2025-12-12 02:05:53,348 - PaperAgentLogger - DEBUG - Window set mode: <Surface(800x600x32 SW)>
+2025-12-12 02:05:53,360 - PaperAgentLogger - DEBUG - Renderer initialized successfully
+2025-12-12 02:06:00,465 - PaperAgentLogger - INFO - test started
+2025-12-12 02:06:00,481 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:10,114 - PaperAgentLogger - INFO - test started
+2025-12-12 02:09:10,130 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:11,985 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case0 	 Computation time:1.8543307781219482 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:09:11,985 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:11,997 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:13,180 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case1 	 Computation time:1.1823630332946777 	 Step40/40	- AllReachGoal-False
+
+2025-12-12 02:09:13,180 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:13,197 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:15,412 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case2 	 Computation time:2.214986562728882 	 Step74/74	- AllReachGoal-False
+
+2025-12-12 02:09:15,435 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:15,448 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:16,865 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case3 	 Computation time:1.4173500537872314 	 Step48/48	- AllReachGoal-False
+
+2025-12-12 02:09:16,866 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:16,880 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:18,649 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case4 	 Computation time:1.7677288055419922 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:09:18,649 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:18,663 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:20,138 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case5 	 Computation time:1.474562406539917 	 Step50/50	- AllReachGoal-False
+
+2025-12-12 02:09:20,139 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:20,153 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:21,916 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case6 	 Computation time:1.7627792358398438 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:09:21,917 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:21,930 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:23,516 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case7 	 Computation time:1.585172176361084 	 Step54/54	- AllReachGoal-False
+
+2025-12-12 02:09:23,517 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:23,530 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:24,952 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case8 	 Computation time:1.4215421676635742 	 Step48/48	- AllReachGoal-False
+
+2025-12-12 02:09:24,953 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:24,966 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:09:26,617 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501742 - End of loop ##################  
+ ####### Case9 	 Computation time:1.6504757404327393 	 Step56/56	- AllReachGoal-False
+
+2025-12-12 02:09:26,618 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:09:26,631 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:17,168 - PaperAgentLogger - INFO - test started
+2025-12-12 02:10:17,185 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:19,200 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case0 	 Computation time:2.014277696609497 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:10:19,201 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:19,213 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:20,504 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case1 	 Computation time:1.29093337059021 	 Step40/40	- AllReachGoal-False
+
+2025-12-12 02:10:20,505 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:20,524 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:23,006 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case2 	 Computation time:2.4809460639953613 	 Step74/74	- AllReachGoal-False
+
+2025-12-12 02:10:23,007 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:23,020 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:24,633 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case3 	 Computation time:1.6122543811798096 	 Step48/48	- AllReachGoal-False
+
+2025-12-12 02:10:24,633 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:24,648 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:26,565 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case4 	 Computation time:1.915858507156372 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:10:26,566 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:26,579 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:28,182 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case5 	 Computation time:1.6022939682006836 	 Step50/50	- AllReachGoal-False
+
+2025-12-12 02:10:28,183 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:28,197 - PaperAgentLogger - DEBUG - New map
+2025-12-12 02:10:30,115 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/1765501809 - End of loop ##################  
+ ####### Case6 	 Computation time:1.9164981842041016 	 Step60/60	- AllReachGoal-False
+
+2025-12-12 02:10:30,115 - PaperAgentLogger - INFO - current rateReachGoal: 0
+2025-12-12 02:10:30,129 - PaperAgentLogger - DEBUG - New map
