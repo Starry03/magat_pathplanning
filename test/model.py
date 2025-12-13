@@ -237,7 +237,7 @@ class Model(LightningModule):
         return x, current_feature
 
     @staticmethod
-    def load_from_checkpoint(path: str) -> "Model":
+    def load_from_checkpoint(path: str, config) -> "Model":
         """
         Load a model from a PyTorch Lightning checkpoint file (.ckpt)
 
@@ -247,7 +247,7 @@ class Model(LightningModule):
         Returns:
             Model instance with loaded weights
         """
-        model = Model()
+        model = Model(config)
         checkpoint = torch.load(path, map_location=model.dev)
 
         # PyTorch Lightning checkpoints have 'state_dict' key
@@ -435,7 +435,7 @@ class Model(LightningModule):
             batch_tensor_map,
             batch_ID_dataset,
         ) = batch
-        log_result = self.mutliAgent_ActionPolicy(
+        log_result = self.multiAgent_ActionPolicy(
             batch_input,
             batch_target,
             batch_makespanTarget,
@@ -475,7 +475,7 @@ class Model(LightningModule):
             "lr_scheduler": scheduler,
         }
 
-    def test_single(self, mode, data_loader: IL_DataLoader):
+    def test_single(self, mode, data_loader: IL_DataLoader, limit: int = -1):
         """
         One cycle of model validation
         :return:
@@ -492,6 +492,7 @@ class Model(LightningModule):
             dataloader = data_loader.valid_loader
             label = "valid"
 
+        count: int = 0
         self.recorder.reset()
         with torch.no_grad():
             for input, target, makespan, _, tensor_map in tqdm(
@@ -509,6 +510,9 @@ class Model(LightningModule):
                 )
                 self.recorder.update(self.robot.getMaxstep(), log_result)
                 logger.info("current rateReachGoal: {}".format(self.recorder.rateReachGoal))
+                count += 1
+                if limit != -1 and count >= limit:
+                    break
 
         logger.info(
             "Accurracy(reachGoalnoCollision): {} \n  "

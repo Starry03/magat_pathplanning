@@ -201,6 +201,19 @@ class MonitoringMultiAgentPerformance:
 
         self.count_validset += 1
 
+        # Calculate rates for real-time logging
+        if self.count_validset > 0:
+            self.rateReachGoal = self.count_reachGoal / self.count_validset
+            self.rateFailedReachGoalSH = self.count_noReachGoalSH / self.count_validset
+            self.ratefindOptimalSolution = self.count_findOptimalSolution / self.count_validset
+            self.rateCollsionFreeSol = self.count_collisionFreeSol / self.count_validset
+            self.rateCollisionPredictedinLoop = self.count_CollisionPredictedinLoop / self.count_validset
+            
+            if self.list_rate_deltaMP:
+                self.avg_rate_deltaMP = np.mean(self.list_rate_deltaMP)
+            if self.list_rate_deltaFT:
+                self.avg_rate_deltaFT = np.mean(self.list_rate_deltaFT)
+
     def summary(self, label, summary_writer, current_epoch):
         """
         This function creates summary data for the system

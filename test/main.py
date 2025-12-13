@@ -2,6 +2,7 @@ import sys
 import pathlib
 import datetime
 import argparse
+from logger import logger
 
 
 # Ensure project root is on sys.path so top-level packages (dataloader, utils, graphs, ...)
@@ -156,15 +157,15 @@ def main() -> None:
     add_flags(arg_parser)
     autograd.set_detect_anomaly(True)
     config = process_config(arg_parser.parse_args())
-    model = Model(config)
-    # model = Model.load_from_checkpoint(
-    #     "./tb_logs/2025-10-27 02:26:28.995596/version_0/checkpoints/epoch=56-step=502626.ckpt",
-    #     config=config,
-    # )
+    # model = Model(config)
+    model = Model.load_from_checkpoint(
+        "/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/2025-12-12 17:16:46.791232/version_0/checkpoints/epoch=49-step=440900.ckpt",
+        config=config,
+    )
     trainer = Trainer(
         accelerator="auto",
         # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
-        max_epochs=1,
+        max_epochs=50,
         precision="16-mixed",
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
         enable_checkpointing=True,
@@ -176,8 +177,8 @@ def main() -> None:
     data_loader = DecentralPlannerDataLoader(config=config)
     if config.get("mode") == "test":
         model.to(model.dev)
-        res = model.test_single(config.get("mode"), data_loader)
-        print("RESULT", res)
+        res = model.test_single(config.get("mode"), data_loader, limit=10)
+        logger.info("RESULT:" + str(res))
         return
     # model.attach_eval_loaders(
     #     valid_loader=data_loader.valid_loader,
