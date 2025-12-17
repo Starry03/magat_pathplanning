@@ -258,6 +258,12 @@ class MonitoringMultiAgentPerformance:
         else:
             summary_writer.add_scalar(
                 "epoch/{}_set_Accuracy_reachGoalNoCollision".format(label),
+                self.rateCollsionFreeSol,
+                current_epoch,
+            )
+
+            summary_writer.add_scalar(
+                "epoch/{}_set_Accuracy_RawReachGoal".format(label),
                 self.rateReachGoal,
                 current_epoch,
             )
@@ -306,6 +312,12 @@ class MonitoringMultiAgentPerformance:
 
         summary_writer.add_scalar(
             "{}_set/Accuracy_reachGoalNoCollision".format(label),
+            self.rateCollsionFreeSol,
+            self.config.num_agents,
+        )
+
+        summary_writer.add_scalar(
+            "{}_set/Accuracy_RawReachGoal".format(label),
             self.rateReachGoal,
             self.config.num_agents,
         )

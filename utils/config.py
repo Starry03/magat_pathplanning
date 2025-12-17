@@ -157,6 +157,8 @@ def process_config(args):
 
     config.load_memory = args.load_memory
 
+    config.collision_shielding = args.collision_shielding
+
     pprint(config)
 
     # making sure that you have provided the exp_name.

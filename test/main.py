@@ -150,6 +150,16 @@ def add_flags(arg_parser: argparse.ArgumentParser) -> None:
     )
 
     arg_parser.add_argument("--load_memory", action="store_true", default=False)
+    # -----------------------------------------------------------------------------------
+    # Collision Shielding Config
+    # Default: True (Enable collision shield)
+    # If set to False (via --no-collision-shielding), collision shield is disabled.
+    # To implement this logically with correct defaults:
+    # 1. We start with a default of True.
+    # 2. We add an argument --no-collision-shielding that sets a dest to False.
+    arg_parser.add_argument('--collision_shielding', dest='collision_shielding', action='store_true', default=True, help="Enable collision shielding (default: True)")
+    arg_parser.add_argument('--no-collision-shielding', dest='collision_shielding', action='store_false', help="Disable collision shielding")
+    # -----------------------------------------------------------------------------------
 
 
 def main() -> None:
@@ -157,15 +167,15 @@ def main() -> None:
     add_flags(arg_parser)
     autograd.set_detect_anomaly(True)
     config = process_config(arg_parser.parse_args())
-    # model = Model(config)
-    model = Model.load_from_checkpoint(
-        "/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/2025-12-12 17:16:46.791232/version_0/checkpoints/epoch=49-step=440900.ckpt",
-        config=config,
-    )
+    model = Model(config)
+    # model = Model.load_from_checkpoint(
+    #     "/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/bo/version_0/checkpoints/epoch=49-step=440900.ckpt",
+    #     config=config,
+    # )
     trainer = Trainer(
         accelerator="auto",
         # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
-        max_epochs=50,
+        max_epochs=150,
         precision="16-mixed",
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
         enable_checkpointing=True,

@@ -449,15 +449,17 @@ class Model(LightningModule):
             "DeteriorationRate(MakeSpan): {} \n  "
             "DeteriorationRate(FlowTime): {} \n  "
             "Rate(collisionPredictedinLoop): {} \n  "
-            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
-                round(self.recorder.rateReachGoal, 4),
+            "Rate(FailedReachGoalbyCollisionShielding): {} \n "
+            "Accuracy(RawReachGoal): {} \n ".format(
+                round(self.recorder.rateCollsionFreeSol, 4),
                 round(self.recorder.avg_rate_deltaMP, 4),
                 round(self.recorder.avg_rate_deltaFT, 4),
                 round(self.recorder.rateCollisionPredictedinLoop, 4),
                 round(self.recorder.rateFailedReachGoalSH, 4),
+                round(self.recorder.rateReachGoal, 4),
             )
         )
-        return self.recorder.rateReachGoal
+        return self.recorder.rateCollsionFreeSol
 
     def configure_optimizers(self):
         optimizer = Adam(
@@ -509,7 +511,7 @@ class Model(LightningModule):
                     mode,
                 )
                 self.recorder.update(self.robot.getMaxstep(), log_result)
-                logger.info("current rateReachGoal: {}".format(self.recorder.rateReachGoal))
+                logger.info("current rateReachGoal: {}".format(self.recorder.rateCollsionFreeSol))
                 count += 1
                 if limit != -1 and count >= limit:
                     break
@@ -519,12 +521,22 @@ class Model(LightningModule):
             "DeteriorationRate(MakeSpan): {} \n  "
             "DeteriorationRate(FlowTime): {} \n  "
             "Rate(collisionPredictedinLoop): {} \n  "
-            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
-                round(self.recorder.rateReachGoal, 4),
+            "Rate(FailedReachGoalbyCollisionShielding): {} \n "
+            "Accuracy(RawReachGoal): {} \n ".format(
+                round(self.recorder.rateCollsionFreeSol, 4),
                 round(self.recorder.avg_rate_deltaMP, 4),
                 round(self.recorder.avg_rate_deltaFT, 4),
                 round(self.recorder.rateCollisionPredictedinLoop, 4),
                 round(self.recorder.rateFailedReachGoalSH, 4),
+                round(self.recorder.rateReachGoal, 4),
             )
         )
-        return self.recorder.rateReachGoal
+        try:
+            # Explicitly log to TensorBoard if logger is available
+            if self.logger and hasattr(self.logger, "experiment"):
+                # Use 'test' label or derive from mode
+                self.recorder.summary(mode, self.logger.experiment, self.current_epoch)
+        except Exception as e:
+            logger.warning(f"Failed to log metrics to TensorBoard: {e}")
+
+        return self.recorder.rateCollsionFreeSol

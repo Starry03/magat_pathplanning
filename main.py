@@ -187,6 +187,17 @@ def main():
     arg_parser.add_argument('--default_actionSelect', action='store_true', default=False)
 
     arg_parser.add_argument('--load_memory', action='store_true', default=False)
+    
+    # -----------------------------------------------------------------------------------
+    # Collision Shielding Config
+    # Default: True (Enable collision shield)
+    # If set to False (via --no-collision-shielding), collision shield is disabled.
+    # To implement this logically with correct defaults:
+    # 1. We start with a default of True.
+    # 2. We add an argument --no-collision-shielding that sets a dest to False.
+    arg_parser.add_argument('--collision_shielding', dest='collision_shielding', action='store_true', default=True, help="Enable collision shielding (default: True)")
+    arg_parser.add_argument('--no-collision-shielding', dest='collision_shielding', action='store_false', help="Disable collision shielding")
+    # -----------------------------------------------------------------------------------
 
     args = arg_parser.parse_args()
 

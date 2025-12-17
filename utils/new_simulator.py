@@ -503,8 +503,32 @@ class multiRobotSimNew:
             new_move, move_to_boundary, move_to_wall_agents, collide_agents, collide_in_move_agents = self.check_collision(
                 self.current_positions, proposed_moves)
 
-            # if not (new_move == proposed_moves).all():
-            #     print('something changes')
+            # If collision shielding is disabled, we ignore the shield's corrections for agent-agent collisions,
+            # BUT we must still enforce map boundaries and wall collisions to prevent simulator crashes.
+            if not self.config.collision_shielding:
+                # Use proposed moves as base
+                final_move = proposed_moves.copy()
+                
+                # Re-enforce boundary constraints
+                out_boundary = (self.current_positions + final_move)[:, 0] >= self.size_map[0]
+                out_boundary |= (self.current_positions + final_move)[:, 1] >= self.size_map[1]
+                out_boundary |= (self.current_positions + final_move)[:, 0] < 0
+                out_boundary |= (self.current_positions + final_move)[:, 1] < 0
+                final_move[out_boundary] = self.stop
+                
+                # Re-enforce wall collisions
+                # We need to check if the proposed move leads to a wall
+                new_pos_check = self.current_positions + final_move
+                for i in range(self.config.num_agents):
+                    if tuple(new_pos_check[i]) in self.wall_dict:
+                        final_move[i] = self.stop
+                
+                new_move = final_move
+
+                # If we detected collisions (collide_agents, collide_in_move_agents, or wall collisions)
+                # and we proceed with the move (shield disabled), we must mark that a collision happened.
+                if len(collide_agents) != 0 or len(collide_in_move_agents) != 0 or len(move_to_wall_agents) != 0:
+                     self.check_moveCollision = True
 
             if not self.check_predictCollsion:
                 if np.count_nonzero(move_to_boundary) != 0 or len(move_to_wall_agents) != 0 or np.count_nonzero(
