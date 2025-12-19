@@ -157,15 +157,16 @@ def main() -> None:
     add_flags(arg_parser)
     autograd.set_detect_anomaly(True)
     config = process_config(arg_parser.parse_args())
-    # model = Model(config)
-    model = Model.load_from_checkpoint(
-        "/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/2025-12-12 17:16:46.791232/version_0/checkpoints/epoch=49-step=440900.ckpt",
-        config=config,
-    )
+    model = Model(config)
+    # model = Model.load_from_checkpoint(
+    #     "/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/2025-12-12 17:16:46.791232/version_0/checkpoints/epoch=49-step=440900.ckpt",
+    #     config=config,
+    # )
     trainer = Trainer(
         accelerator="auto",
         # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
         max_epochs=50,
+        val_check_interval=0.90,
         precision="16-mixed",
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
         enable_checkpointing=True,
@@ -188,7 +189,7 @@ def main() -> None:
     trainer.fit(
         model,
         train_dataloaders=data_loader.train_loader,
-        val_dataloaders=data_loader.validStep_loader,
+        val_dataloaders=data_loader.valid_loader,
     )
     config["mode"] = "test"
     data_loader = DecentralPlannerDataLoader(config=config)

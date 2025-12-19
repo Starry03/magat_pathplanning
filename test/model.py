@@ -25,6 +25,7 @@ from logger import logger
 from tqdm import tqdm
 import time
 from test.renderer import Renderer
+from layer.time_graph import TimeDelayedAggregation
 
 class Model(LightningModule):
     def __init__(self, config) -> None:
@@ -60,7 +61,7 @@ class Model(LightningModule):
             BatchNorm2d(128),
             self.activation,
         )
-        self.flatten = Flatten()
+        self.tgnn = TimeDelayedAggregation(128, self.nGraphFilterTaps)
         self.flatten = Flatten()
         # self.cgnn = ChebConv(
         #     in_channels=128,
@@ -210,27 +211,28 @@ class Model(LightningModule):
         # we need T = nGraphFilterTaps - 1
         
         if x_prev is None:
-             x_prev = torch.zeros(B, N, self.nGraphFilterTaps - 1, 128, device=self.dev)
+            x_prev = torch.zeros(B, N, self.nGraphFilterTaps - 1, 128, device=self.dev)
 
         y_time = [x] # x is [B*N, 128]
         if len(self.S.shape) == 4:
-             S = self.S.squeeze(1) # [B, N, N]
+            S = self.S.squeeze(1) # [B, N, N]
         else:
-             S = self.S
+            S = self.S
              
         if len(S.shape) == 4 and S.shape[1] == 1:
-             S = S.squeeze(1)
+            S = S.squeeze(1)
         
-        for t in range(self.nGraphFilterTaps - 1):
-            prev_feat = x_prev[:, :, t, :]
+        # for t in range(self.nGraphFilterTaps - 1):
+        #     prev_feat = x_prev[:, :, t, :]
             
-            filtered = torch.matmul(S, prev_feat)
+        #     filtered = torch.matmul(S, prev_feat)
             
-            filtered = filtered.view(B * N, 128)
-            y_time.append(filtered)
-        x_concatenated = cat(y_time, dim=1) # [B*N, 128 * K]
+        #     filtered = filtered.view(B * N, 128)
+        #     y_time.append(filtered)
+        # x_concatenated = cat(y_time, dim=1) # [B*N, 128 * K]
         
-        x = x_concatenated
+        # x = x_concatenated
+        x = self.tgnn(x, x_prev, S)
         x = self.activation(x)
         x = self.fc(x)  # [B*N, n_actions]
 
@@ -289,17 +291,18 @@ class Model(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        batch_input, batch_target, _, batch_GSO, _ = batch
-        (B, N, _, _, _) = batch_input.shape
-        batch_target = batch_target.reshape(B * N, self.n_actions)
-        self.addGSO(batch_GSO)
-        logits, _ = self(batch_input)
-        targets = torch.max(batch_target, 1)[1]
-        loss = self.loss(logits, targets)
-        self.val_acc(logits, targets)
-        self.log("val_acc", self.val_acc, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        return loss
+        # batch_input, batch_target, _, batch_GSO, _ = batch
+        # (B, N, _, _, _) = batch_input.shape
+        # batch_target = batch_target.reshape(B * N, self.n_actions)
+        # self.addGSO(batch_GSO)
+        # logits, _ = self(batch_input)
+        # targets = torch.max(batch_target, 1)[1]
+        # loss = self.loss(logits, targets)
+        # self.val_acc(logits, targets)
+        # self.log("val_acc", self.val_acc, prog_bar=True, on_step=False, on_epoch=True)
+        # self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
+        # return loss
+        return self.test_step(batch, batch_idx, False)
 
     def multiAgent_ActionPolicy(
         self, input, load_target, makespanTarget, tensor_map, ID_dataset, mode
@@ -421,42 +424,45 @@ class Model(LightningModule):
             Time_cases_ForwardPass,
         )
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx, log=True):
         """
 
         single dim batch
         """
-        logger.info("test started")
+        if log:
+            logger.info("test started")
         self.recorder.reset()
         (
             batch_input,
             batch_target,
-            batch_makespanTarget,
-            batch_tensor_map,
-            batch_ID_dataset,
+            batch_info_tuple,
+            batch_GSO,
+            batch_map_tensor,
         ) = batch
+
         log_result = self.multiAgent_ActionPolicy(
             batch_input,
             batch_target,
-            batch_makespanTarget,
-            batch_tensor_map,
+            batch_info_tuple,
+            batch_map_tensor.cpu(),
             self.recorder.count_validset,
             mode="test",
         )
         self.recorder.update(self.robot.getMaxstep(), log_result)
-        logger.info(
-            "Accurracy(reachGoalnoCollision): {} \n  "
-            "DeteriorationRate(MakeSpan): {} \n  "
-            "DeteriorationRate(FlowTime): {} \n  "
-            "Rate(collisionPredictedinLoop): {} \n  "
-            "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
-                round(self.recorder.rateReachGoal, 4),
-                round(self.recorder.avg_rate_deltaMP, 4),
-                round(self.recorder.avg_rate_deltaFT, 4),
-                round(self.recorder.rateCollisionPredictedinLoop, 4),
-                round(self.recorder.rateFailedReachGoalSH, 4),
+        if log:
+            logger.info(
+                "Accurracy(reachGoalnoCollision): {} \n  "
+                "DeteriorationRate(MakeSpan): {} \n  "
+                "DeteriorationRate(FlowTime): {} \n  "
+                "Rate(collisionPredictedinLoop): {} \n  "
+                "Rate(FailedReachGoalbyCollisionShielding): {} \n ".format(
+                    round(self.recorder.rateReachGoal, 4),
+                    round(self.recorder.avg_rate_deltaMP, 4),
+                    round(self.recorder.avg_rate_deltaFT, 4),
+                    round(self.recorder.rateCollisionPredictedinLoop, 4),
+                    round(self.recorder.rateFailedReachGoalSH, 4),
+                )
             )
-        )
         return self.recorder.rateReachGoal
 
     def configure_optimizers(self):

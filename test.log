@@ -29696,3 +29696,429 @@
   Rate(FailedReachGoalbyCollisionShielding): 0.6 
  
 2025-12-13 16:07:20,032 - PaperAgentLogger - INFO - RESULT:0.4
+2025-12-19 02:54:18,884 - PaperAgentLogger - INFO - test started
+2025-12-19 02:54:19,074 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:21,455 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case0 	 Computation time:2.379997968673706 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 02:54:21,455 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:21,467 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:22,643 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case1 	 Computation time:1.17628812789917 	 Step40/40	- AllReachGoal-False
+
+2025-12-19 02:54:22,644 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:22,670 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:24,824 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case2 	 Computation time:2.1535050868988037 	 Step74/74	- AllReachGoal-False
+
+2025-12-19 02:54:24,825 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:24,844 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:26,258 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case3 	 Computation time:1.4135093688964844 	 Step48/48	- AllReachGoal-False
+
+2025-12-19 02:54:26,259 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:26,272 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:28,026 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case4 	 Computation time:1.7531535625457764 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 02:54:28,027 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:28,039 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:29,510 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case5 	 Computation time:1.4708032608032227 	 Step50/50	- AllReachGoal-False
+
+2025-12-19 02:54:29,511 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:29,524 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:31,306 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case6 	 Computation time:1.7807691097259521 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 02:54:31,306 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:31,323 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:32,915 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case7 	 Computation time:1.5916862487792969 	 Step54/54	- AllReachGoal-False
+
+2025-12-19 02:54:32,916 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:32,932 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:34,379 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case8 	 Computation time:1.4469079971313477 	 Step48/48	- AllReachGoal-False
+
+2025-12-19 02:54:34,380 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 02:54:34,398 - PaperAgentLogger - DEBUG - New map
+2025-12-19 02:54:56,075 - PaperAgentLogger - INFO - test started
+2025-12-19 02:56:41,738 - PaperAgentLogger - INFO - test started
+2025-12-19 03:01:03,932 - PaperAgentLogger - INFO - test started
+2025-12-19 03:02:26,754 - PaperAgentLogger - INFO - test started
+2025-12-19 03:03:16,894 - PaperAgentLogger - INFO - test started
+2025-12-19 03:04:22,480 - PaperAgentLogger - INFO - test started
+2025-12-19 14:57:24,888 - PaperAgentLogger - INFO - test started
+2025-12-19 14:57:25,045 - PaperAgentLogger - DEBUG - New map
+2025-12-19 14:57:27,293 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case0 	 Computation time:2.2463645935058594 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 14:57:27,294 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 14:57:27,305 - PaperAgentLogger - DEBUG - New map
+2025-12-19 14:57:28,516 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case1 	 Computation time:1.210458517074585 	 Step40/40	- AllReachGoal-False
+
+2025-12-19 14:57:28,517 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 14:57:28,532 - PaperAgentLogger - DEBUG - New map
+2025-12-19 14:57:30,785 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case2 	 Computation time:2.2528562545776367 	 Step74/74	- AllReachGoal-False
+
+2025-12-19 14:57:30,786 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 14:57:30,812 - PaperAgentLogger - DEBUG - New map
+2025-12-19 14:57:32,275 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case3 	 Computation time:1.463160514831543 	 Step48/48	- AllReachGoal-False
+
+2025-12-19 14:57:32,276 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 14:57:32,289 - PaperAgentLogger - DEBUG - New map
+2025-12-19 14:57:34,110 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case4 	 Computation time:1.8200199604034424 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 14:57:34,111 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 14:57:34,123 - PaperAgentLogger - DEBUG - New map
+2025-12-19 14:57:35,630 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case5 	 Computation time:1.5066461563110352 	 Step50/50	- AllReachGoal-False
+
+2025-12-19 14:57:35,631 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 14:57:35,644 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:06:18,942 - PaperAgentLogger - INFO - test started
+2025-12-19 15:06:19,104 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:12:03,864 - PaperAgentLogger - INFO - test started
+2025-12-19 15:12:04,039 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:12:06,368 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case0 	 Computation time:2.3285582065582275 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 15:12:06,369 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 15:12:06,380 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:12:07,667 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case1 	 Computation time:1.2864105701446533 	 Step40/40	- AllReachGoal-False
+
+2025-12-19 15:12:07,668 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 15:12:07,683 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:12:10,063 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case2 	 Computation time:2.379483222961426 	 Step74/74	- AllReachGoal-False
+
+2025-12-19 15:12:10,064 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 15:12:10,084 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:12:11,638 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case3 	 Computation time:1.554011344909668 	 Step48/48	- AllReachGoal-False
+
+2025-12-19 15:12:11,639 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 15:12:11,655 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:12:13,572 - PaperAgentLogger - INFO - ################## PaperArchitecture_map20x20_rho1_10Agent/K3_HS0/0 - End of loop ##################  
+ ####### Case4 	 Computation time:1.9169425964355469 	 Step60/60	- AllReachGoal-False
+
+2025-12-19 15:12:13,573 - PaperAgentLogger - INFO - current rateReachGoal: 0.0
+2025-12-19 15:12:13,585 - PaperAgentLogger - DEBUG - New map
+2025-12-19 15:32:49,831 - PaperAgentLogger - INFO - test started
+2025-12-19 15:40:12,444 - PaperAgentLogger - INFO - test started
+2025-12-19 15:41:33,571 - PaperAgentLogger - INFO - test started
+2025-12-19 15:42:46,803 - PaperAgentLogger - INFO - test started
+2025-12-19 15:45:14,528 - PaperAgentLogger - INFO - test started
+2025-12-19 15:46:07,537 - PaperAgentLogger - INFO - test started
+2025-12-19 15:49:40,443 - PaperAgentLogger - INFO - test started
+2025-12-19 15:50:38,215 - PaperAgentLogger - INFO - test started
+2025-12-19 15:51:38,172 - PaperAgentLogger - INFO - test started
+2025-12-19 15:53:13,830 - PaperAgentLogger - INFO - test started
+2025-12-19 15:54:33,683 - PaperAgentLogger - INFO - test started
+2025-12-19 15:55:53,372 - PaperAgentLogger - INFO - test started
+2025-12-19 15:57:02,050 - PaperAgentLogger - INFO - test started
+2025-12-19 15:57:51,493 - PaperAgentLogger - INFO - test started
+2025-12-19 16:30:56,819 - PaperAgentLogger - INFO - test started
+2025-12-19 16:31:46,878 - PaperAgentLogger - INFO - test started
+2025-12-19 16:32:16,201 - PaperAgentLogger - INFO - test started
+2025-12-19 16:33:34,910 - PaperAgentLogger - INFO - test started
+2025-12-19 16:35:01,542 - PaperAgentLogger - INFO - test started
+2025-12-19 16:35:24,993 - PaperAgentLogger - INFO - test started
+2025-12-19 16:36:30,707 - PaperAgentLogger - INFO - test started
+2025-12-19 16:37:37,323 - PaperAgentLogger - INFO - test started
+2025-12-19 16:37:37,371 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:37:40,260 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 2.0 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:37:40,267 - PaperAgentLogger - INFO - test started
+2025-12-19 16:37:40,280 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:37:42,393 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9708 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:38:21,586 - PaperAgentLogger - INFO - test started
+2025-12-19 16:39:00,859 - PaperAgentLogger - INFO - test started
+2025-12-19 16:39:51,904 - PaperAgentLogger - INFO - test started
+2025-12-19 16:44:09,659 - PaperAgentLogger - INFO - test started
+2025-12-19 16:46:34,847 - PaperAgentLogger - INFO - test started
+2025-12-19 16:48:13,188 - PaperAgentLogger - INFO - test started
+2025-12-19 16:48:58,886 - PaperAgentLogger - INFO - test started
+2025-12-19 16:48:58,937 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:01,774 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9824 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:01,781 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:01,795 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:03,914 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9766 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:05,609 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:05,625 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:07,762 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9882 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:07,792 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:07,805 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:09,921 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9649 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:09,925 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:09,939 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:12,055 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9706 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:12,059 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:12,073 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:14,428 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0357 
+  DeteriorationRate(FlowTime): 1.9531 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:14,432 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:14,445 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:16,548 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 2.0238 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:16,557 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:16,570 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:18,532 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0435 
+  DeteriorationRate(FlowTime): 2.0993 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:18,536 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:18,552 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:20,958 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0357 
+  DeteriorationRate(FlowTime): 2.5031 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:20,963 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:20,974 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:22,765 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0476 
+  DeteriorationRate(FlowTime): 1.7727 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:22,774 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:22,789 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:25,231 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0345 
+  DeteriorationRate(FlowTime): 2.4046 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:25,241 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:25,253 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:27,200 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0435 
+  DeteriorationRate(FlowTime): 2.0724 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:27,209 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:27,222 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:29,334 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 2.0059 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:29,343 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:29,358 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:31,867 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0333 
+  DeteriorationRate(FlowTime): 2.3833 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:31,876 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:31,890 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:34,174 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.037 
+  DeteriorationRate(FlowTime): 2.2695 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:34,183 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:34,195 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:49:36,060 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0455 
+  DeteriorationRate(FlowTime): 1.8354 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:49:36,069 - PaperAgentLogger - INFO - test started
+2025-12-19 16:49:36,082 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:00,110 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:00,152 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:02,789 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9824 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:02,802 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:02,815 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:04,909 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9766 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:06,313 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:06,329 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:08,445 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9882 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:08,450 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:08,463 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:10,567 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9766 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:10,582 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:10,596 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:12,712 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9706 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:12,717 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:12,731 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:15,094 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0357 
+  DeteriorationRate(FlowTime): 1.9635 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:15,099 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:15,113 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:17,227 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 2.0238 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:17,231 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:17,244 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:19,193 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0435 
+  DeteriorationRate(FlowTime): 2.0728 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:19,202 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:19,216 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:21,576 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0357 
+  DeteriorationRate(FlowTime): 2.5342 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:21,580 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:21,592 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:23,380 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0476 
+  DeteriorationRate(FlowTime): 1.7792 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:23,389 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:23,403 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:25,834 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0345 
+  DeteriorationRate(FlowTime): 2.3757 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:25,843 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:25,855 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:27,805 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0435 
+  DeteriorationRate(FlowTime): 2.0855 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:27,815 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:27,827 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:29,940 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.04 
+  DeteriorationRate(FlowTime): 1.9763 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:29,949 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:29,965 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:32,476 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0333 
+  DeteriorationRate(FlowTime): 2.3722 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:32,486 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:32,500 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:34,779 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.037 
+  DeteriorationRate(FlowTime): 2.2874 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:34,788 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:34,799 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:54:36,671 - PaperAgentLogger - INFO - Accurracy(reachGoalnoCollision): 0.0 
+  DeteriorationRate(MakeSpan): 1.0455 
+  DeteriorationRate(FlowTime): 1.8418 
+  Rate(collisionPredictedinLoop): 1.0 
+  Rate(FailedReachGoalbyCollisionShielding): 1.0 
+ 
+2025-12-19 16:54:36,680 - PaperAgentLogger - INFO - test started
+2025-12-19 16:54:36,692 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:58:52,125 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:58:54,717 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:58:58,094 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:59:00,195 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:59:02,315 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:59:04,421 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:59:06,767 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:59:54,113 - PaperAgentLogger - DEBUG - New map
+2025-12-19 16:59:56,763 - PaperAgentLogger - DEBUG - New map
