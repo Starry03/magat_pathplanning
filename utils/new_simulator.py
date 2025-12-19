@@ -750,7 +750,7 @@ class multiRobotSimNew:
                                                                                   self.flowtimeTarget]
 
     def get_pos(self, map_tensor):
-        map_np = map_tensor.numpy()
+        map_np = map_tensor.cpu().numpy()
         pos = np.transpose(np.nonzero(map_np))
         return pos
 

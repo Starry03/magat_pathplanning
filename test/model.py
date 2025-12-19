@@ -25,6 +25,7 @@ from logger import logger
 from tqdm import tqdm
 import time
 from test.renderer import Renderer
+from layer.time_graph import TimeDelayedAggregation
 
 class Model(LightningModule):
     def __init__(self, config) -> None:
@@ -61,14 +62,7 @@ class Model(LightningModule):
             self.activation,
         )
         self.flatten = Flatten()
-        self.flatten = Flatten()
-        # self.cgnn = ChebConv(
-        #     in_channels=128,
-        #     out_channels=128,
-        #     K=self.nGraphFilterTaps,  # K-hop polynomial filter
-        #     normalization="sym",  # Symmetric normalization (I - D^{-1/2} A D^{-1/2})
-        # )
-        # self.cgnn = self._graph_block_paper()
+        self.time_gnn = TimeDelayedAggregation(128, self.nGraphFilterTaps)
         self.fc = Linear(128 * self.nGraphFilterTaps, self.n_actions)
         self.S = ones(1, self.E, self.n_agents, self.n_agents, device=self.dev)
 
@@ -212,25 +206,30 @@ class Model(LightningModule):
         if x_prev is None:
              x_prev = torch.zeros(B, N, self.nGraphFilterTaps - 1, 128, device=self.dev)
 
-        y_time = [x] # x is [B*N, 128]
-        if len(self.S.shape) == 4:
-             S = self.S.squeeze(1) # [B, N, N]
+        # y_time = [x] # x is [B*N, 128]
+        # if len(self.S.shape) == 4:
+        #      S = self.S.squeeze(1) # [B, N, N]
+        # else:
+        #      S = self.S
+             
+        # if len(S.shape) == 4 and S.shape[1] == 1:
+        #      S = S.squeeze(1)
+        
+        # for t in range(self.nGraphFilterTaps - 1):
+        #     prev_feat = x_prev[:, :, t, :]
+            
+        #     filtered = torch.matmul(S, prev_feat)
+            
+        #     filtered = filtered.view(B * N, 128)
+        #     y_time.append(filtered)
+        # x_concatenated = cat(y_time, dim=1) # [B*N, 128 * K]
+        
+        if len(self.S.shape) == 4 and self.S.shape[1] == 1:
+             S = self.S.squeeze(1)
         else:
              S = self.S
-             
-        if len(S.shape) == 4 and S.shape[1] == 1:
-             S = S.squeeze(1)
-        
-        for t in range(self.nGraphFilterTaps - 1):
-            prev_feat = x_prev[:, :, t, :]
             
-            filtered = torch.matmul(S, prev_feat)
-            
-            filtered = filtered.view(B * N, 128)
-            y_time.append(filtered)
-        x_concatenated = cat(y_time, dim=1) # [B*N, 128 * K]
-        
-        x = x_concatenated
+        x = self.time_gnn(x, x_prev, S)
         x = self.activation(x)
         x = self.fc(x)  # [B*N, n_actions]
 
@@ -289,17 +288,18 @@ class Model(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        batch_input, batch_target, _, batch_GSO, _ = batch
-        (B, N, _, _, _) = batch_input.shape
-        batch_target = batch_target.reshape(B * N, self.n_actions)
-        self.addGSO(batch_GSO)
-        logits, _ = self(batch_input)
-        targets = torch.max(batch_target, 1)[1]
-        loss = self.loss(logits, targets)
-        self.val_acc(logits, targets)
-        self.log("val_acc", self.val_acc, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        return loss
+        # batch_input, batch_target, _, batch_GSO, _ = batch
+        # (B, N, _, _, _) = batch_input.shape
+        # batch_target = batch_target.reshape(B * N, self.n_actions)
+        # self.addGSO(batch_GSO)
+        # logits, _ = self(batch_input)
+        # targets = torch.max(batch_target, 1)[1]
+        # loss = self.loss(logits, targets)
+        # self.val_acc(logits, targets)
+        # self.log("val_acc", self.val_acc, prog_bar=True, on_step=False, on_epoch=True)
+        # self.log("val_loss", loss, prog_bar=True, on_step=False, on_epoch=True)
+        # return loss
+        return self.test_step(batch, batch_idx)
 
     def multiAgent_ActionPolicy(
         self, input, load_target, makespanTarget, tensor_map, ID_dataset, mode
@@ -432,8 +432,8 @@ class Model(LightningModule):
             batch_input,
             batch_target,
             batch_makespanTarget,
+            batch_GSO,
             batch_tensor_map,
-            batch_ID_dataset,
         ) = batch
         log_result = self.multiAgent_ActionPolicy(
             batch_input,

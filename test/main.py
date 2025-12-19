@@ -169,7 +169,7 @@ def main() -> None:
     config = process_config(arg_parser.parse_args())
     model = Model(config)
     # model = Model.load_from_checkpoint(
-    #     "/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/bo/version_0/checkpoints/epoch=49-step=440900.ckpt",
+    #     path="/home/starry/Documents/uni_project/magat_pathplanning/tb_logs/2025-12-17 11:58:36.030045/version_0/checkpoints/epoch=26-step=238086.ckpt",
     #     config=config,
     # )
     trainer = Trainer(
@@ -198,7 +198,7 @@ def main() -> None:
     trainer.fit(
         model,
         train_dataloaders=data_loader.train_loader,
-        val_dataloaders=data_loader.validStep_loader,
+        val_dataloaders=data_loader.valid_loader,
     )
     config["mode"] = "test"
     data_loader = DecentralPlannerDataLoader(config=config)

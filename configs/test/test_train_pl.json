@@ -48,5 +48,5 @@
   "test_num_processes": 1,
   "FOV": 4,
   "exp_time": "2024-06-15_15-30-00",
-  "render": true
+  "render": false
 }

@@ -19,5 +19,5 @@ python ./test/main.py /home/starry/Documents/uni_project/magat_pathplanning/conf
     --guidance Project_G \
     --test_num_processes 4 \
     --tb_ExpName PaperArchitecture_TestRun_${now} \
-    --render \
-    --no-collision-shielding
+    # --render \
+    # --no-collision-shielding
