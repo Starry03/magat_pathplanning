@@ -197,11 +197,22 @@ class Model(LightningModule):
         (B, N, C, W, H) = x.shape
         # convolutional layers
         x = self._format_to_conv2d(x)
-        x = self.flatten(
-            self.compress(
-                self.pool(self.conv3(self.drop(self.conv2(self.drop(self.conv1(x))))))
-            )
-        )  # output [B*N, 128]
+        # print(x.shape)
+        x = self.conv1(x)
+        # print(x.shape)
+        x = self.drop(x)
+        x = self.conv2(x)
+        # print(x.shape)
+        x = self.drop(x)
+        x = self.conv3(x)
+        # print(x.shape)
+        x = self.drop(x)
+        x = self.pool(x)
+        # print(x.shape)
+        x = self.compress(x)
+        # print(x.shape)
+        x = self.flatten(x) # output [B*N, 128]
+        # print(x.shape)
         
         current_feature = x.view(B, N, -1) # [B, N, 128]
 
@@ -233,9 +244,12 @@ class Model(LightningModule):
         
         # x = x_concatenated
         x = self.tgnn(x, x_prev, S)
+        # print(x.shape)
         x = self.activation(x)
+        # print(x.shape)
         x = self.fc(x)  # [B*N, n_actions]
-
+        # print(x.shape)
+        # exit(0)
         return x, current_feature
 
     @staticmethod
