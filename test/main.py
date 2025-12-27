@@ -165,7 +165,7 @@ def main() -> None:
     trainer = Trainer(
         accelerator="auto",
         # max_epochs=int(config.get("max_epoch", config.get("max_epochs", 10))),
-        max_epochs=50,
+        max_epochs=150,
         val_check_interval=0.90,
         precision="16-mixed",
         logger=TensorBoardLogger("tb_logs", name=f"{datetime.datetime.now()}"),
@@ -178,7 +178,7 @@ def main() -> None:
     data_loader = DecentralPlannerDataLoader(config=config)
     if config.get("mode") == "test":
         model.to(model.dev)
-        res = model.test_single(config.get("mode"), data_loader, limit=10)
+        res = model.test_single(config.get("mode"), data_loader, limit=100)
         logger.info("RESULT:" + str(res))
         return
     # model.attach_eval_loaders(
@@ -199,7 +199,7 @@ def main() -> None:
     #     test_loader=getattr(data_loader, "test_loader", None),
     #     training_eval_loader=getattr(data_loader, "test_trainingSet_loader", None),
     # )
-    model.test_single(config.get("mode"), data_loader)
+    model.test_single(config.get("mode"), data_loader, limit=100)
 
 
 if __name__ == "__main__":
